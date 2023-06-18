@@ -29,12 +29,20 @@ def read_exchange_keys(
 def create_exchange_key(
     *,
     db: Session = Depends(deps.get_db),
+    exchange_nm: str = Body(None),
     exchange_key_in: schemas.ExchangeKeyCreate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new exchange key.
     """
+    exchange = crud.exchange.get_by_name(db, exchange_nm=exchange_nm)
+    if exchange is None:
+        raise HTTPException(
+            status_code=404,
+            detail="The exchange with this name does not exist in the system",
+        )
+    exchange_key_in.exchange_id = exchange.id
     exchange_key_in.user_id = current_user.id
     exchange_key = crud.exchange_key.create(db, obj_in=exchange_key_in)
     return exchange_key

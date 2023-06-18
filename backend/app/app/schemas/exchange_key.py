@@ -12,10 +12,9 @@ class ExchangeKeyBase(BaseModel):
 
 # Properties to receive via API on creation
 class ExchangeKeyCreate(ExchangeKeyBase):
-    exchange_id: int
-    user_id: int
     access_key: str
     secret_key: str
+    account: str | None = None
 
 # Properties to receive via API on update
 class ExchangeKeyUpdate(ExchangeKeyBase):
