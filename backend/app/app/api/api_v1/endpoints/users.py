@@ -97,6 +97,7 @@ def create_user_open(
     """
     Create new user without the need to be logged in.
     """
+    print(email, password, full_name)
     if not settings.USERS_OPEN_REGISTRATION:
         raise HTTPException(
             status_code=403,
