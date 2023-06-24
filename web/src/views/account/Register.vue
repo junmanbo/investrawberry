@@ -6,12 +6,10 @@ import { useUsersStore, useAlertStore } from '@/stores';
 import { router } from '@/router';
 
 const schema = Yup.object().shape({
-    firstName: Yup.string()
-        .required('First Name is required'),
-    lastName: Yup.string()
-        .required('Last Name is required'),
-    username: Yup.string()
-        .required('Username is required'),
+    full_name: Yup.string()
+        .required('Full Name is required'),
+    email: Yup.string()
+        .required('Email is required'),
     password: Yup.string()
         .required('Password is required')
         .min(6, 'Password must be at least 6 characters')
@@ -32,35 +30,30 @@ async function onSubmit(values) {
 
 <template>
     <div class="card m-3">
-        <h4 class="card-header">Register</h4>
+        <h4 class="card-header">회원가입</h4>
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
                 <div class="form-group">
-                    <label>First Name</label>
-                    <Field name="firstName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
-                    <div class="invalid-feedback">{{ errors.firstName }}</div>
+                    <label>이름</label>
+                    <Field name="full_name" type="text" class="form-control" :class="{ 'is-invalid': errors.full_name }" />
+                    <div class="invalid-feedback">{{ errors.full_name }}</div>
                 </div>
                 <div class="form-group">
-                    <label>Last Name</label>
-                    <Field name="lastName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
-                    <div class="invalid-feedback">{{ errors.lastName }}</div>
+                    <label>이메일</label>
+                    <Field name="email" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" />
+                    <div class="invalid-feedback">{{ errors.email }}</div>
                 </div>
                 <div class="form-group">
-                    <label>Username</label>
-                    <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
-                    <div class="invalid-feedback">{{ errors.username }}</div>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
+                    <label>비밀번호</label>
                     <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />
                     <div class="invalid-feedback">{{ errors.password }}</div>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" :disabled="isSubmitting">
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                        Register
+                        회원가입
                     </button>
-                    <router-link to="login" class="btn btn-link">Cancel</router-link>
+                    <router-link to="login" class="btn btn-link">취소</router-link>
                 </div>
             </Form>
         </div>

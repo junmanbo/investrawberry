@@ -22,12 +22,10 @@ if (id) {
 }
 
 const schema = Yup.object().shape({
-    firstName: Yup.string()
-        .required('First Name is required'),
-    lastName: Yup.string()
-        .required('Last Name is required'),
-    username: Yup.string()
-        .required('Username is required'),
+    fullName: Yup.string()
+        .required('Full Name is required'),
+    email: Yup.string()
+        .required('Email is required'),
     password: Yup.string()
         .transform(x => x === '' ? undefined : x)
         // password optional in edit mode
@@ -59,25 +57,20 @@ async function onSubmit(values) {
         <Form @submit="onSubmit" :validation-schema="schema" :initial-values="user" v-slot="{ errors, isSubmitting }">
             <div class="form-row">
                 <div class="form-group col">
-                    <label>First Name</label>
-                    <Field name="firstName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
-                    <div class="invalid-feedback">{{ errors.firstName }}</div>
-                </div>
-                <div class="form-group col">
-                    <label>Last Name</label>
-                    <Field name="lastName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
-                    <div class="invalid-feedback">{{ errors.lastName }}</div>
+                    <label>이름</label>
+                    <Field name="fullName" type="text" class="form-control" :class="{ 'is-invalid': errors.fullName }" />
+                    <div class="invalid-feedback">{{ errors.fullName }}</div>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col">
-                    <label>Username</label>
-                    <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
-                    <div class="invalid-feedback">{{ errors.username }}</div>
+                    <label>이메일</label>
+                    <Field name="email" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" />
+                    <div class="invalid-feedback">{{ errors.email }}</div>
                 </div>
                 <div class="form-group col">
                     <label>
-                        Password
+                        비밀번호
                         <em v-if="user">(Leave blank to keep the same password)</em>
                     </label>
                     <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />
@@ -87,9 +80,9 @@ async function onSubmit(values) {
             <div class="form-group">
                 <button class="btn btn-primary" :disabled="isSubmitting">
                     <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                    Save
+                    저장
                 </button>
-                <router-link to="/users" class="btn btn-link">Cancel</router-link>
+                <router-link to="/users" class="btn btn-link">취소</router-link>
             </div>
         </Form>
     </template>

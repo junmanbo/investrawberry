@@ -9,8 +9,8 @@ const { user } = storeToRefs(authStore);
 
 <template>
     <div v-if="user">
-        <h1>Hi {{user.firstName}}!</h1>
-        <p>You're logged in with Vue 3 + Pinia & JWT!!</p>
-        <p><router-link to="/users">Manage Users</router-link></p>
+        <h1>Hi {{user.fullName}}!</h1>
+        <p>인베스트로베리에 오신 것을 환영합니다!</p>
+        <p><router-link to="/users">유저 관리</router-link></p>
     </div>
 </template>

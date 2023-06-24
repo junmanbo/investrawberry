@@ -18,25 +18,25 @@ async function onSubmit(values) {
 
 <template>
     <div class="card m-3">
-        <h4 class="card-header">Login</h4>
+        <h4 class="card-header">로그인</h4>
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
                 <div class="form-group">
-                    <label>Username</label>
+                    <label>이메일</label>
                     <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
                     <div class="invalid-feedback">{{ errors.username }}</div>
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
+                    <label>비밀번호</label>
                     <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />
                     <div class="invalid-feedback">{{ errors.password }}</div>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" :disabled="isSubmitting">
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                        Login
+                        로그인
                     </button>
-                    <router-link to="register" class="btn btn-link">Register</router-link>
+                    <router-link to="register" class="btn btn-link">회원가입</router-link>
                 </div>
             </Form>
         </div>
