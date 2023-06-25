@@ -7,8 +7,8 @@ from app.schemas.exchange_key import ExchangeKeyCreate, ExchangeKeyUpdate
 
 
 class CRUDExchangeKey(CRUDBase[ExchangeKey, ExchangeKeyCreate, ExchangeKeyUpdate]):
-    def get_multi_by_owner(self, db: Session, *, owner_id: int, skip: int, limit: int) -> List[ExchangeKey]:
-        return db.query(ExchangeKey).offset(skip).limit(limit).filter(ExchangeKey.user_id == owner_id).all()
+    def get_multi_by_owner(self, db: Session, *, owner_id: int) -> List[ExchangeKey]:
+        return db.query(ExchangeKey).filter(ExchangeKey.user_id == owner_id).all()
 
 
 

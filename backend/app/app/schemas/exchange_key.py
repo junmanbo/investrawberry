@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from app import schemas
+
 # Shared properties
 class ExchangeKeyBase(BaseModel):
     exchange_id: Optional[int] = None
@@ -28,7 +30,7 @@ class ExchangeKeyInDBBase(ExchangeKeyBase):
 
 # Additional properties to return via API
 class ExchangeKey(ExchangeKeyInDBBase):
-    pass
+    exchange: schemas.Exchange
 
 # Additional properties stored in DB
 class ExchangeKeyInDB(ExchangeKeyInDBBase):

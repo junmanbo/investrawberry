@@ -12,16 +12,12 @@ router = APIRouter()
 @router.get("/", response_model=List[schemas.ExchangeKey])
 def read_exchange_keys(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve exchange keys.
     """
-    exchange_keys = crud.exchange_key.get_multi_by_owner(
-        db, owner_id=current_user.id, skip=skip, limit=limit
-    )
+    exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=current_user.id)
     return exchange_keys
 
 
