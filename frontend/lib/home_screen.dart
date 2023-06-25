@@ -11,7 +11,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static List<Widget> _widgetOptions = [
     Center(
-      child: Image.asset('assets/images/investroberry.png', width: 170.0),
+      child: Image.asset('assets/images/investrawberry.png', width: 170.0),
     ),
     Text('자산'),
     Text('전략'),
@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(['Investroberry','자산','전략','MY'][_selectedIndex]),
+        title: Text(['Investrawberry','자산','전략','MY'][_selectedIndex]),
         elevation: 0.0,
         backgroundColor: Colors.redAccent,
         centerTitle: false,

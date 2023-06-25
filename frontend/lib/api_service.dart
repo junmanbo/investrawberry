@@ -22,6 +22,28 @@ class ApiService {
       throw Exception(e.toString());
     }
   }
+
+  Future<Map<String, dynamic>> getUserInfo(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        return jsonResponse;
+      } else {
+        throw Exception('Failed to load user info.');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   Future<bool> signUp(String email, String password, String fullname) async {
     try {
       final response = await http.post(

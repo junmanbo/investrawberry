@@ -19,6 +19,13 @@ class _LogInState extends State<LogIn> {
   final apiService = ApiService();
 
   @override
+  void initState() {
+    super.initState();
+    // Load the login state when the app starts
+    Provider.of<LoginStateManager>(context, listen: false).loadLoginState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -40,7 +47,7 @@ class _LogInState extends State<LogIn> {
               Padding(padding: EdgeInsets.only(top: 50)),
               Center(
                 child: Image(
-                  image: AssetImage('assets/images/investroberry.png'),
+                  image: AssetImage('assets/images/investrawberry.png'),
                   width: 170.0,
                 ),
               ),
@@ -95,7 +102,7 @@ class _LogInState extends State<LogIn> {
                                       await apiService.login(controller.text, controller2.text);
                                       showSnackBar(context, Text('로그인 성공!'));
                                       final loginStateManager = Provider.of<LoginStateManager>(context, listen: false);
-                                      loginStateManager.login();
+                                      loginStateManager.login(jwtToken);
                                       // 홈 화면으로 이동
                                       Navigator.push(
                                         context,
@@ -103,6 +110,7 @@ class _LogInState extends State<LogIn> {
                                           builder: (context) => HomeScreen(),
                                         ),
                                       );
+                                    print(jwtToken);
                                   } catch (e) {
                                     // 로그인이 실패한 경우 스낵바를 표시
                                     showSnackBar(context, Text('로그인 실패..'));
