@@ -33,7 +33,7 @@ class ApiService {
   Future<List<Map<String, dynamic>>> getApiKeys(String token) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/exchangekeys'),
+        Uri.parse('$baseUrl/exchangekeys/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -47,6 +47,29 @@ class ApiService {
       throw Exception('Failed to load API keys: $e');
     }
   }
+
+  Future<void> postExchangeKey(String token, String exchange, String accessKey, String secretKey, String accountNumber) async {
+    final url = '$baseUrl/exchangekeys/';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final body = {
+      'exchange_nm': exchange,
+      'exchange_key_in': {
+        'access_key': accessKey,
+        'secret_key': secretKey,
+        'account': accountNumber,
+      },
+    };
+    try {
+      final response = await _post(url, body, headers: headers);
+      print('Exchange key posted successfully');
+    } on Exception catch (e) {
+      print('Failed to post exchange key: $e');
+      throw e;
+    }
+}
 
   Future<void> deleteExchangeKey(String token, int exchangeKeyId) async {
     final url = '$baseUrl/exchangekeys/$exchangeKeyId';
