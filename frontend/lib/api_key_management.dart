@@ -3,8 +3,17 @@ import 'package:provider/provider.dart';
 import 'api_service.dart';
 import 'login_state_manager.dart';
 
-class ApiKeyManagement extends StatelessWidget {
+class ApiKeyManagement extends StatefulWidget {
+  @override
+  _ApiKeyManagementState createState() => _ApiKeyManagementState();
+}
+
+class _ApiKeyManagementState extends State<ApiKeyManagement> {
   final ApiService _apiService = ApiService();
+
+  Future<List<Map<String, dynamic>>> _getApiKeys(BuildContext context) async {
+    return _apiService.getApiKeys(Provider.of<LoginStateManager>(context, listen: false).jwtToken);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +25,7 @@ class ApiKeyManagement extends StatelessWidget {
         centerTitle: true,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _apiService.getApiKeys(Provider.of<LoginStateManager>(context).jwtToken),
+        future: _getApiKeys(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator(); // Show loading spinner while waiting for data
@@ -37,12 +46,12 @@ class ApiKeyManagement extends StatelessWidget {
                     return ListTile(
                       leading: Image.asset('assets/images/logo.png'), // Replace with your actual logo image
                       title: Text(apiKey['exchange']['exchange_nm'] ?? 'Unknown'),
-                      //subtitle: Text(apiKey['access_key'] ?? 'Unknown'),
-                      subtitle: Text(apiKey['access_key']?.substring(0, 10) ?? 'Unknown'),
+                      subtitle: Text(apiKey['access_key']?.substring(0, 4) ?? 'Unknown'),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
-                        onPressed: () {
-                          // TODO: Implement delete functionality
+                        onPressed: () async {
+                          await _apiService.deleteExchangeKey(Provider.of<LoginStateManager>(context, listen: false).jwtToken, apiKey['id']);
+                          setState(() {}); // Refresh the state to update the list
                         },
                       ),
                     );

@@ -110,7 +110,6 @@ class _LogInState extends State<LogIn> {
                                           builder: (context) => HomeScreen(),
                                         ),
                                       );
-                                    print(jwtToken);
                                   } catch (e) {
                                     // 로그인이 실패한 경우 스낵바를 표시
                                     showSnackBar(context, Text('로그인 실패..'));

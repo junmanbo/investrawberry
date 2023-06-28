@@ -49,5 +49,9 @@ class LoginStateManager with ChangeNotifier {
       throw Exception('Not logged in.');
     }
   }
+
+  void notify() {
+    notifyListeners();
+  }
 }
 

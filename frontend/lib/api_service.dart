@@ -48,6 +48,17 @@ class ApiService {
     }
   }
 
+  Future<void> deleteExchangeKey(String token, int exchangeKeyId) async {
+    final url = '$baseUrl/exchangekeys/$exchangeKeyId';
+    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'};
+    try {
+      final response = await _delete(url, headers);
+      print('Exchange key deleted successfully');
+    } on Exception catch (e) {
+      print('Failed to delete exchange key: $e');
+    }
+  }
+
   // method
   Future<Map<String, dynamic>> _get(String url, Map<String, String> headers) async {
     try {
@@ -67,6 +78,16 @@ class ApiService {
       return jsonDecode(response.body);
     } catch (e) {
       throw Exception('Failed to POST $url: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> _delete(String url, Map<String, String> headers) async {
+    try {
+      final response = await http.delete(Uri.parse(url), headers: headers);
+      _checkStatusCode(response.statusCode);
+      return jsonDecode(response.body);
+    } catch (e) {
+      throw Exception('Failed to DELETE $url: $e');
     }
   }
 
