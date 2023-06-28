@@ -63,11 +63,13 @@ def update_exchange_key(
         )
     if exchange_key.user_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    exchange_key = crud.exchange_key.update(db, db_obj=exchange_key, obj_in=exchange_key_in)
+    exchange_key = crud.exchange_key.update(
+        db, db_obj=exchange_key, obj_in=exchange_key_in
+    )
     return exchange_key
 
 
-@router.delete("/{exchange_key_id}", response_model=schemas.ExchangeKey)
+@router.delete("/{exchange_key_id}")
 def delete_exchange_key(
     *,
     db: Session = Depends(deps.get_db),
@@ -86,5 +88,7 @@ def delete_exchange_key(
     if exchange_key.user_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
     exchange_key = crud.exchange_key.remove(db, id=exchange_key_id)
-    return exchange_key
-
+    if exchange_key is True:
+        return {"message": "success"}
+    else:
+        return {"message": "failed"}
