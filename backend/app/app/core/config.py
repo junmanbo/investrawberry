@@ -84,6 +84,7 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
     FIRST_SUPERUSER: EmailStr = os.getenv("FIRST_SUPERUSER")
     FIRST_SUPERUSER_PASSWORD: str | None = os.getenv("FIRST_SUPERUSER_PASSWORD")
+    FIRST_NAME: str | None = os.getenv("FIRST_NAME")
     USERS_OPEN_REGISTRATION: bool = True
 
     class Config:
