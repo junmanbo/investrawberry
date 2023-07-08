@@ -14,7 +14,7 @@ function request(method) {
             headers: authHeader(url)
         };
         if (body) {
-            if (url.endsWith('/login/access-token')) {
+            if (url.endsWith('access-token')) {
                 requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
                 requestOptions.body = new URLSearchParams(body);
             } else {
