@@ -13,6 +13,7 @@ function request(method) {
             method,
             headers: authHeader(url)
         };
+        console.log(requestOptions);
         if (body) {
             if (url.endsWith('access-token')) {
                 requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -31,10 +32,10 @@ function request(method) {
 function authHeader(url) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { user } = useAuthStore();
-    const isLoggedIn = !!user?.token;
+    const isLoggedIn = !!user?.access_token;
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
     if (isLoggedIn && isApiUrl) {
-        return { Authorization: `Bearer ${user.token}` };
+        return { Authorization: `Bearer ${user.access_token}` };
     } else {
         return {};
     }
