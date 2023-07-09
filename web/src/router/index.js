@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore, useAlertStore } from '@/stores';
 import { Home } from '@/views';
 import accountRoutes from './account.routes';
-import usersRoutes from './users.routes';
 import mypageRoutes from './mypage.routes';
 import balanceRoutes from './balance.routes';
 
@@ -13,7 +12,6 @@ export const router = createRouter({
     routes: [
         { path: '/', component: Home },
         { ...accountRoutes },
-        { ...usersRoutes },
         { ...mypageRoutes },
         { ...balanceRoutes },
         // catch all redirect to home page

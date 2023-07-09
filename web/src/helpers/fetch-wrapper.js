@@ -13,7 +13,6 @@ function request(method) {
             method,
             headers: authHeader(url)
         };
-        console.log(requestOptions);
         if (body) {
             if (url.endsWith('access-token')) {
                 requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';

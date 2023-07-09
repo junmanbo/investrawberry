@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>나의 소중한 자산</h3>
+    <h3>자산 현황</h3>
     <div v-if="Object.keys(balanceStore.balances).length === 0">
       등록된 자산이 없습니다.
     </div>
@@ -9,11 +9,11 @@
       <table class="assets">
         <thead>
           <tr>
-            <th>항목</th>
-            <th>비율</th>
+            <th>자산</th>
+            <th>비율(%)</th>
             <th>수량</th>
-            <th>가격</th>
-            <th>평가금액</th>
+            <th>가격(Won)</th>
+            <th>평가금액(Won)</th>
           </tr>
         </thead>
         <tbody>
@@ -25,7 +25,7 @@
             <td>{{ item.value }}%</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.price }}</td>
-            <td>{{ item.quantity * item.price }}</td>
+            <td>{{ Math.floor(item.quantity * item.price) }}</td>
           </tr>
         </tbody>
       </table>
@@ -43,7 +43,16 @@ const balanceStore = useBalanceStore();
 
 let chartData = ref([]);
 const prices = reactive({});
-const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta', 'lime', 'pink', 'teal', 'lavender', 'brown', 'beige', 'maroon', 'mint', 'olive', 'coral', 'navy', 'grey', 'white'];
+const colors = reactive({});
+
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 onMounted(async () => {
     try {
@@ -113,14 +122,16 @@ watch(prices, () => {
                 .map(([asset, quantity], index) => {
                     const price = asset === 'KRW' ? 1 : prices[`KRW-${asset}`] || 0;
                     const weight = ((quantity * price / total) * 100).toFixed(2);
-                    const item = {
+                    if (!colors[`${exchange} ${asset}`]) {
+                        colors[`${exchange} ${asset}`] = getRandomColor();
+                    }
+                    return {
                         label: `${exchange} ${asset}`,
                         value: weight,
-                        quantity,
+                        color: colors[`${exchange} ${asset}`],
+                        quantity: quantity.toFixed(6),
                         price,
-                        color: colors[index % colors.length],
                     };
-                    return item;
                 })
                 .filter(({ value }) => value > 0)
         );
