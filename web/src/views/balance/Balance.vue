@@ -12,7 +12,6 @@
             <th>자산</th>
             <th>비율(%)</th>
             <th>수량</th>
-            <th>가격(Won)</th>
             <th>평가금액(Won)</th>
           </tr>
         </thead>
@@ -24,8 +23,7 @@
             </td>
             <td>{{ item.value }}%</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ Math.floor(item.quantity * item.price) }}</td>
+            <td>{{ Math.floor(item.notional) }}</td>
           </tr>
         </tbody>
       </table>
@@ -34,7 +32,6 @@
 </template>
 
 <script setup>
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import { ref, onMounted, watch, reactive } from 'vue';
 import { useBalanceStore } from '@/stores';
 import PieChart from '@/components/PieChart.vue'; // 원형 그래프 컴포넌트를 임포트합니다.
@@ -42,7 +39,6 @@ import PieChart from '@/components/PieChart.vue'; // 원형 그래프 컴포넌�
 const balanceStore = useBalanceStore();
 
 let chartData = ref([]);
-const prices = reactive({});
 const colors = reactive({});
 
 function getRandomColor() {
@@ -59,69 +55,25 @@ onMounted(async () => {
         // Get balances data
         await balanceStore.getBalances();
 
-        // Connect to Upbit websocket API
-        const client = new W3CWebSocket('wss://api.upbit.com/websocket/v1');
+        calculateChartData();
 
-        // Handle websocket open event
-        client.onopen = () => {
-            console.log('Websocket opened!')
-            // Get asset codes from balances data
-            const symbols = Object.values(balanceStore.balances)
-                .flatMap((assets) => Object.keys(assets))
-                .map((asset) => `KRW-${asset}`);
-
-            // Subscribe to ticker data for specified markets
-            client.send(
-                JSON.stringify([
-                    {
-                        ticket: 'test',
-                    },
-                    {
-                        type: 'ticker',
-                        codes: symbols,
-                    },
-                ])
-            );
-        };
-
-        // Handle websocket message event
-        client.onmessage = async (event) => {
-            // Convert Blob to ArrayBuffer
-            const arrayBuffer = await event.data.arrayBuffer();
-            // Convert ArrayBuffer to string
-            const dataString = new TextDecoder().decode(arrayBuffer);
-            // Parse JSON string
-            const data = JSON.parse(dataString);
-            if (data.type === 'ticker') {
-                prices[data.code] = data.trade_price;
-            }
-        };
-
-        // Handle websocket close event
-        client.onclose = () => {
-            console.log('Upbit websocket connection closed');
-        };
     } catch (error) {
         console.error(error);
     }
 });
 
-
-watch(prices, () => {
+function calculateChartData() {
     try {
         let total = 0;
         for (let exchange in balanceStore.balances) {
             for (let asset in balanceStore.balances[exchange]) {
-                const quantity = balanceStore.balances[exchange][asset];
-                const price = asset === 'KRW' ? 1 : prices[`KRW-${asset}`] || 0;
-                total += quantity * price;
+                total += balanceStore.balances[exchange][asset].notional;
             }
         }
         chartData.value = Object.entries(balanceStore.balances).flatMap(([exchange, assets]) =>
             Object.entries(assets)
-                .map(([asset, quantity], index) => {
-                    const price = asset === 'KRW' ? 1 : prices[`KRW-${asset}`] || 0;
-                    const weight = ((quantity * price / total) * 100).toFixed(2);
+                .map(([asset, { amount, notional }], index) => {
+                    const weight = ((notional / total) * 100).toFixed(2);
                     if (!colors[`${exchange} ${asset}`]) {
                         colors[`${exchange} ${asset}`] = getRandomColor();
                     }
@@ -129,8 +81,8 @@ watch(prices, () => {
                         label: `${exchange} ${asset}`,
                         value: weight,
                         color: colors[`${exchange} ${asset}`],
-                        quantity: quantity.toFixed(6),
-                        price,
+                        quantity: amount.toFixed(6),
+                        notional,
                     };
                 })
                 .filter(({ value }) => value > 0)
@@ -138,7 +90,7 @@ watch(prices, () => {
     } catch (error) {
         console.error(error);
     }
-});
+}
 
 </script>
 
