@@ -5,8 +5,13 @@ from typing import Optional
 # Shared properties
 class ExchangeBase(BaseModel):
     exchange_nm: Optional[str] = None
+    exchange_knm: Optional[str] = None
     open_time: Optional[time] = None
     close_time: Optional[time] = None
+    is_summer: Optional[bool] = None
+    min_interval: Optional[int] = None
+    min_amount: Optional[int] = None
+    is_coin: Optional[bool] = None
 
 # Properties to receive via API on creation
 class ExchangeCreate(ExchangeBase):
