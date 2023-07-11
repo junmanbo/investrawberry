@@ -9,7 +9,7 @@ const authStore = useAuthStore();
         <router-link to="/" class="navbar-brand">Investrawberry</router-link>
         <div class="navbar-nav ml-auto">
             <router-link to="/balance" class="nav-item nav-link text-dark">자산</router-link>
-            <router-link to="/strategy" class="nav-item nav-link text-dark">전략</router-link>
+            <router-link to="/order" class="nav-item nav-link text-dark">주문</router-link>
             <router-link to="/mypage" class="nav-item nav-link text-dark">마이페이지</router-link>
             <button @click="authStore.logout()" class="btn btn-link nav-item nav-link text-dark">로그아웃</button>
         </div>
