@@ -13,13 +13,28 @@ class Upbit:
         return balance
 
     def get_total_balance(self):
-        total_balance = self.get_balance().get("total")
+        total_balance = {}
+        balances = self.get_balance()
+        balances = balances.get("info")
+        for balance in balances:
+            currency = balance.get("currency")
+            avg_price = int(float(balance.get("avg_buy_price")))
+            amount = float(balance.get("balance"))
+            notional = amount * avg_price
+            if currency == "KRW":
+                avg_price = 1
+            elif notional < 100:
+                continue
+            total_balance[currency] = {
+                "amount": amount,
+                "avg_price": avg_price,
+                "notional": amount * avg_price
+            }
+            
         return total_balance
         
 
 if __name__ == "__main__":
-    access = "vC1gCHjhxBzSeQYb2NiCoWNemnA7OYFc7GieQmdX"
-    secret = "k2hknvsxzPpV5ca5RLJkwKHpwIYMxJYHcETkODUr"
     upbit = Upbit(access, secret)
     total_balance = upbit.get_total_balance()
     pprint(total_balance)

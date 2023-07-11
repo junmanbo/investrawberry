@@ -1,11 +1,11 @@
-from typing import Any, List
+from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import crud, models
 from app.api import deps
-from app.trading import upbit
+from app.trading import upbit, kis
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ def get_balance_all(
         if key.exchange.exchange_nm == "UPBIT":
             client = upbit.Upbit(key.access_key, key.secret_key)
         elif key.exchange.exchange_nm == "KIS":
-            continue
+            client = kis.KIS(key.access_key, key.secret_key, key.account)
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
             
