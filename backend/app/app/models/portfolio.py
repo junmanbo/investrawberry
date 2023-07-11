@@ -19,6 +19,6 @@ class Portfolio(Base):
 
 
 class PortfolioMemo(Base):
-    portfolio = Column(Integer, ForeignKey("portfolio.id"))
+    portfolio = Column(Integer, ForeignKey("portfolio.id"), primary_key=True)
     content = Column(Text)
 

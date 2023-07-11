@@ -16,5 +16,5 @@ class Ticker(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    exchange = relationship("Exchange", backref="exchange_keys")
+    exchange = relationship("Exchange", backref="ticker")
 
