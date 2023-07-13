@@ -9,7 +9,7 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Exchange])
+@router.get("", response_model=List[schemas.Exchange])
 def read_exchanges(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -23,7 +23,7 @@ def read_exchanges(
     return exchanges
 
 
-@router.post("/", response_model=schemas.Exchange)
+@router.post("", response_model=schemas.Exchange)
 def create_exchange(
     *,
     db: Session = Depends(deps.get_db),

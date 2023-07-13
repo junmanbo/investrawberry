@@ -3,7 +3,7 @@ from pprint import pprint
 
 
 class KIS:
-    def __init__(self, access, secret, acc):
+    def __init__(self, access: str, secret: str, acc: str):
         self.exchange = mojito.KoreaInvestment(access, secret, acc)
 
     def get_balance(self):
@@ -40,12 +40,16 @@ class KIS:
         }
 
         return total_balance
+
+    def get_market(self):
+        markets = self.exchange.fetch_symbols()
+        return markets
         
 
 
 
 if __name__ == "__main__":
     kis = KIS(key, secret, acc_no)
-    balance = kis.get_total_balance()
-    pprint(balance)
+    markets = kis.get_market()
+    print(markets.head(5))
 

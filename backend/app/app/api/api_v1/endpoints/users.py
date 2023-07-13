@@ -13,7 +13,7 @@ from app.utils import send_new_account_email
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.User])
+@router.get("", response_model=List[schemas.User])
 def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -27,7 +27,7 @@ def read_users(
     return users
 
 
-@router.post("/", response_model=schemas.User)
+@router.post("", response_model=schemas.User)
 def create_user(
     *,
     db: Session = Depends(deps.get_db),
@@ -97,7 +97,6 @@ def create_user_open(
     """
     Create new user without the need to be logged in.
     """
-    print(email, password, full_name)
     if not settings.USERS_OPEN_REGISTRATION:
         raise HTTPException(
             status_code=403,
@@ -113,42 +112,3 @@ def create_user_open(
     user = crud.user.create(db, obj_in=user_in)
     return user
 
-
-@router.get("/{user_id}", response_model=schemas.User)
-def read_user_by_id(
-    user_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
-    db: Session = Depends(deps.get_db),
-) -> Any:
-    """
-    Get a specific user by id.
-    """
-    user = crud.user.get(db, id=user_id)
-    if user == current_user:
-        return user
-    if not crud.user.is_superuser(current_user):
-        raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
-    return user
-
-
-@router.put("/{user_id}", response_model=schemas.User)
-def update_user(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_id: int,
-    user_in: schemas.UserUpdate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
-) -> Any:
-    """
-    Update a user.
-    """
-    user = crud.user.get(db, id=user_id)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this username does not exist in the system",
-        )
-    user = crud.user.update(db, db_obj=user, obj_in=user_in)
-    return user

@@ -9,6 +9,8 @@ class TickerBase(BaseModel):
     ticker_knm: Optional[str] = None
     ticker_type: Optional[str] = None
     is_coin: Optional[bool] = None
+    maker_fee: Optional[float] = None
+    taker_fee: Optional[float] = None
 
 # Properties to receive via API on creation
 class TickerCreate(TickerBase):

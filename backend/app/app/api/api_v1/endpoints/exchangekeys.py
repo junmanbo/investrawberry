@@ -9,7 +9,7 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.ExchangeKey])
+@router.get("", response_model=List[schemas.ExchangeKey])
 def read_exchange_keys(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -21,7 +21,7 @@ def read_exchange_keys(
     return exchange_keys
 
 
-@router.post("/", response_model=schemas.ExchangeKey)
+@router.post("", response_model=schemas.ExchangeKey)
 def create_exchange_key(
     *,
     db: Session = Depends(deps.get_db),

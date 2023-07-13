@@ -2,7 +2,7 @@ import ccxt
 from pprint import pprint
 
 class Upbit:
-    def __init__(self, access, secret):
+    def __init__(self, access=None, secret=None):
         self.exchange = ccxt.upbit({
             'apiKey': access,
             'secret': secret
@@ -32,10 +32,13 @@ class Upbit:
             }
             
         return total_balance
+
+    def get_market(self):
+        markets = self.exchange.fetch_markets()
+        return markets
         
 
 if __name__ == "__main__":
-    upbit = Upbit(access, secret)
-    total_balance = upbit.get_total_balance()
-    pprint(total_balance)
+    upbit = Upbit()
+    pprint(upbit.get_market())
 
