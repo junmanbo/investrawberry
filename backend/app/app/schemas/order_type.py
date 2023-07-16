@@ -5,11 +5,11 @@ from typing import Optional
 class OrderTypeBase(BaseModel):
     order_type_nm: Optional[str] = None
     order_type_knm: Optional[str] = None
-    order_type_desc: Optional[str] = None
 
 # Properties to receive via API on creation
 class OrderTypeCreate(OrderTypeBase):
     order_type_nm: str
+    order_type_knm: str
 
 # Properties to receive via API on update
 class OrderTypeUpdate(OrderTypeBase):

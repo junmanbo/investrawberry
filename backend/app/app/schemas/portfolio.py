@@ -1,20 +1,17 @@
 from pydantic import BaseModel
 from typing import Optional
 
-# Shared properties
+# Portfolio
 class PortfolioBase(BaseModel):
     user_id: Optional[int] = None
     ticker_id: Optional[int] = None
-    weight: Optional[int] = 100
-    rebal_period: Optional[int] = 365
-    is_running: Optional[bool] = False
+    weight: Optional[int] = None
+    rebal_period: Optional[int] = None
 
-# Properties to receive via API on creation
 class PortfolioCreate(PortfolioBase):
     user_id: int
     ticker_id: int
 
-# Properties to receive via API on update
 class PortfolioUpdate(PortfolioBase):
     pass
 
@@ -24,23 +21,22 @@ class PortfolioInDBBase(PortfolioBase):
     class Config:
         orm_mode = True
 
-# Additional properties to return via API
 class Portfolio(PortfolioInDBBase):
     pass
 
-# Additional properties stored in DB
 class PortfolioInDB(PortfolioInDBBase):
     pass
 
 
+# PortfolioMemo
 class PortfolioMemoBase(BaseModel):
+    portfolio_id: Optional[int] = None
     content: Optional[str] = None
 
-# Properties to receive via API on creation
 class PortfolioMemoCreate(PortfolioMemoBase):
     portfolio_id: int
+    content: str
 
-# Properties to receive via API on update
 class PortfolioMemoUpdate(PortfolioMemoBase):
     pass
 
@@ -50,11 +46,74 @@ class PortfolioMemoInDBBase(PortfolioMemoBase):
     class Config:
         orm_mode = True
 
-# Additional properties to return via API
 class PortfolioMemo(PortfolioMemoInDBBase):
     pass
 
-# Additional properties stored in DB
 class PortfolioMemoInDB(PortfolioMemoInDBBase):
+    pass
+
+
+# PortfolioOrder
+class PortfolioOrderBase(BaseModel):
+    portfolio_id: Optional[int] = None
+    strategy_id: Optional[int] = None
+    is_running: Optional[bool] = None
+    amount: Optional[int] = None
+
+class PortfolioOrderCreate(PortfolioOrderBase):
+    portfolio_id: int
+    strategy_id: int
+    amount: int
+
+class PortfolioOrderUpdate(PortfolioOrderBase):
+    pass
+
+class PortfolioOrderInDBBase(PortfolioOrderBase):
+    id: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
+class PortfolioOrder(PortfolioOrderInDBBase):
+    pass
+
+class PortfolioOrderInDB(PortfolioOrderInDBBase):
+    pass
+
+
+# PortfolioTransaction
+class PortfolioTransactionBase(BaseModel):
+    portfolio_order_id: Optional[int] = None
+    uuid: Optional[str] = None
+    ticker_id: Optional[int] = None
+    order_type_id: Optional[int] = None
+    side: Optional[str] = None
+    price: Optional[float] = None
+    quantity: Optional[float] = None
+    fee: Optional[float] = None
+    is_filled: Optional[bool] = None
+
+class PortfolioTransactionCreate(PortfolioTransactionBase):
+    portfolio_order_id: int
+    uuid: str
+    ticker_id: int
+    order_type_id: int
+    side: str
+    price: float
+    quantity: float
+
+class PortfolioTransactionUpdate(PortfolioTransactionBase):
+    pass
+
+class PortfolioTransactionInDBBase(PortfolioTransactionBase):
+    id: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
+class PortfolioTransaction(PortfolioTransactionInDBBase):
+    pass
+
+class PortfolioTransactionInDB(PortfolioTransactionInDBBase):
     pass
 

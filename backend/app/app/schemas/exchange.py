@@ -11,7 +11,6 @@ class ExchangeBase(BaseModel):
     is_summer: Optional[bool] = None
     min_interval: Optional[int] = None
     min_amount: Optional[int] = None
-    is_coin: Optional[bool] = None
 
 # Properties to receive via API on creation
 class ExchangeCreate(ExchangeBase):

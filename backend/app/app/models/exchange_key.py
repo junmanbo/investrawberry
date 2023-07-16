@@ -16,5 +16,6 @@ class ExchangeKey(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    exchange = relationship("Exchange", backref="exchange_keys")
+    exchange = relationship("Exchange", backref="exchange_key")
+    user = relationship("User", backref="exchange_key")
 

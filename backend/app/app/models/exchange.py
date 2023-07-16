@@ -10,10 +10,10 @@ class Exchange(Base):
     exchange_knm = Column(String(50))
     open_time = Column(Time, nullable=False)
     close_time = Column(Time,nullable=False)
-    min_interval = Column(Integer, default=1)
-    min_amount = Column(Integer, default=1)
     is_summer = Column(Boolean(), default=False)
-    is_coin = Column(Boolean())
+    min_interval = Column(Integer, default=0.3)
+    min_amount = Column(Integer)
+    min_digit = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
