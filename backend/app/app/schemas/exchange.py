@@ -11,12 +11,15 @@ class ExchangeBase(BaseModel):
     is_summer: Optional[bool] = None
     min_interval: Optional[int] = None
     min_amount: Optional[int] = None
+    min_digit: Optional[int] = None
 
 # Properties to receive via API on creation
 class ExchangeCreate(ExchangeBase):
     exchange_nm: str
     open_time: time
     close_time: time
+    is_summer: bool
+    min_interval: int
 
 # Properties to receive via API on update
 class ExchangeUpdate(ExchangeBase):
