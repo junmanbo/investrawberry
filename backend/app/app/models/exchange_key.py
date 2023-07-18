@@ -1,11 +1,13 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
 
 
 class ExchangeKey(Base):
+    __table_args__ = (UniqueConstraint('user_id', 'exchange_id'),)
+
     id = Column(Integer, primary_key=True, index=True)
     exchange_id = Column(Integer, ForeignKey("exchange.id"))
     user_id = Column(Integer, ForeignKey("user.id"))

@@ -15,6 +15,5 @@ class CRUDExchangeKey(CRUDBase[ExchangeKey, ExchangeKeyCreate, ExchangeKeyUpdate
                                             ExchangeKey.exchange_id == exchange_id).first()
 
 
-
 exchange_key = CRUDExchangeKey(ExchangeKey)
 

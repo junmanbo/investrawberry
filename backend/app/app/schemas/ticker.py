@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from app import schemas
+
+
 # Shared properties
 class TickerBase(BaseModel):
     exchange_id: Optional[int] = None
