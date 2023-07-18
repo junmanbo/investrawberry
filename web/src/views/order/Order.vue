@@ -32,7 +32,6 @@ import StockList from '@/views/order/StockList.vue';
 import { useRouter } from 'vue-router';
 
 let search = ref('');
-let selectedTicker = ref(null);
 
 const tickerStore = useTickerStore();
 const searchResult = computed(() => tickerStore.searchResult);
@@ -65,9 +64,10 @@ watch(search, () => {
 });
 
 const selectTicker = (ticker) => {
-  ticker.price = 1000; // 가격 데이터 가져오기 전까지 임의로 설정
+  ticker.price = 1000;
   console.log(ticker);
-  router.push({ name: 'order-form', params: { ticker_data: ticker } });
+  tickerStore.selectTicker(ticker); // 선택한 ticker 정보를 저장하는 액션 호출
+  router.push('/order/form')
 };
 
 </script>
@@ -116,5 +116,4 @@ li:hover{
 background-color:#f0f0f0;
 }
 </style>
-
 

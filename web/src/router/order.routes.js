@@ -5,6 +5,6 @@ export default {
     component: Layout,
     children: [
         { path: '', component: Order},
-        { path: 'form', name: 'order-form', component: OrderForm},
+        { path: 'form', component: OrderForm},
     ]
 };
