@@ -40,5 +40,5 @@ class Upbit:
 
 if __name__ == "__main__":
     upbit = Upbit()
-    pprint(upbit.get_market())
+    pprint(upbit.get_balance())
 
