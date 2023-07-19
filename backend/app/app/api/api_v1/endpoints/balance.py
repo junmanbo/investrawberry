@@ -22,7 +22,6 @@ def get_balance_all(
     total_balance = {}
     for key in exchange_keys:
         if key.exchange.exchange_nm == "UPBIT":
-            print(key.access_key, key.secret_key)
             client = upbit.Upbit(key.access_key, key.secret_key)
         elif key.exchange.exchange_nm == "KIS":
             client = kis.KIS(key.access_key, key.secret_key, key.account)

@@ -16,17 +16,17 @@ class SimpleTransactionBase(BaseModel):
 # Properties to receive via API on creation
 class SimpleTransactionCreate(SimpleTransactionBase):
     user_id: int
-    uuid: str
     ticker_id: int
     order_type_id: int
     side: str
     price: float
     quantity: float
-    is_filled: bool
 
 # Properties to receive via API on update
 class SimpleTransactionUpdate(SimpleTransactionBase):
-    pass
+    uuid: str
+    fee: float
+    is_filled: bool
 
 class SimpleTransactionInDBBase(SimpleTransactionBase):
     id: Optional[int] = None

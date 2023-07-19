@@ -8,14 +8,14 @@ from app.db.base_class import Base
 class SimpleTransaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    uuid = Column(String, nullable=False)
+    uuid = Column(String)
     ticker_id = Column(Integer, ForeignKey("ticker.id"))
     order_type_id = Column(Integer, ForeignKey("order_type.id"))
     side = Column(String(10), nullable=False)
     price = Column(Float, nullable=False)
     quantity = Column(Float, nullable=False)
     fee = Column(Float)
-    is_fiiled = Column(Boolean(), nullable=False, default=False)
+    is_fiiled = Column(Boolean(), default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

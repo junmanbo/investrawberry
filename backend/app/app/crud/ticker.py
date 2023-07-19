@@ -1,6 +1,6 @@
-from typing import Optional, List
+from typing import List
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.ticker import Ticker

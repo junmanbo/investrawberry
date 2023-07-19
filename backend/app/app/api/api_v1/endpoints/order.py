@@ -3,30 +3,38 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import crud, models
+from app import crud, models, schemas
 from app.api import deps
 from app.trading import upbit, kis
 
 router = APIRouter()
 
 
-@router.get("")
-def get_balance_all(
+@router.post("/simple", response_model=schemas.SimpleTransaction)
+def simple_order(
     db: Session = Depends(deps.get_db),
+    order: schemas.SimpleTransactionCreate,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    계좌 자산 전체 조회
+    단순 주문(market, limit)
     """
-    exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=current_user.id)
-    total_balance = {}
-    for key in exchange_keys:
-        if key.exchange.exchange_nm == "UPBIT":
-            print(key.access_key, key.secret_key)
-            client = upbit.Upbit(key.access_key, key.secret_key)
-        elif key.exchange.exchange_nm == "KIS":
-            client = kis.KIS(key.access_key, key.secret_key, key.account)
-        balance = client.get_total_balance()
-        total_balance[key.exchange.exchange_nm] = balance
+    ticker = crud.ticker.get(order.ticker_id)
+    exchange = crud.exchange.get(ticker.exchange_id)
+    order_type = crud.order_type.get(order.order_type_id)
+    order.order_type = order_type.order_type_nm
+
+    key = crud.exchange_key.get_key_by_owner_exchange(db, owner_id=current_user.id, exchange_id=exchange.id)
+
+    if exchange.exchange_nm == "UPBIT":
+        client = upbit.Upbit(key.access_key, key.secret_key)
+    elif exchange.exchange_nm == "KIS":
+        client = kis.KIS(key.access_key, key.secret_key, key.account)
+
+    order_result = client.place_order(order)
+
+
+
+
             
-    return total_balance
+    return order_result
