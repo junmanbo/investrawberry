@@ -37,8 +37,13 @@ class Upbit:
         markets = self.exchange.fetch_markets()
         return markets
 
-    def place_order(self, **kwargs):
-        order = self.exchange.create_order(kwargs.symbol, kwargs.order_type, kwargs.side, kwargs.amount, kwargs.price)
+    def place_order(self, params):
+        symbol = f"KRW-{params.ticker.symbol}"
+        side = params.side.lower()
+        order_type = params.order_type.lower()
+
+        order = self.exchange.create_order(symbol, order_type, side, params.quantity, params.price)
+        return order
         
 
 if __name__ == "__main__":

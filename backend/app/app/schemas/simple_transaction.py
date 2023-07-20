@@ -4,9 +4,9 @@ from typing import Optional
 # Shared properties
 class SimpleTransactionBase(BaseModel):
     user_id: Optional[int] = None
-    uuid: Optional[str] = None
     ticker_id: Optional[int] = None
-    order_type_id: Optional[int] = None
+    uuid: Optional[str] = None
+    order_type: Optional[str] = None
     side: Optional[str] = None
     price: Optional[float] = None
     quantity: Optional[float] = None
@@ -15,9 +15,8 @@ class SimpleTransactionBase(BaseModel):
 
 # Properties to receive via API on creation
 class SimpleTransactionCreate(SimpleTransactionBase):
-    user_id: int
     ticker_id: int
-    order_type_id: int
+    order_type: str
     side: str
     price: float
     quantity: float

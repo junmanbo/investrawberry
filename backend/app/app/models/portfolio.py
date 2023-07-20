@@ -49,7 +49,7 @@ class PortfolioTransaction(Base):
     portfolio_order_id = Column(Integer, ForeignKey("portfolio_order.id"))
     uuid = Column(String, nullable=False)
     ticker_id = Column(Integer, ForeignKey("ticker.id"))
-    order_type_id = Column(Integer, ForeignKey("order_type.id"))
+    order_type = Column(String(10))
     side = Column(String(10), nullable=False)
     price = Column(Float, nullable=False)
     quantity = Column(Float, nullable=False)
@@ -60,4 +60,3 @@ class PortfolioTransaction(Base):
 
     portfolio_order = relationship("PortfolioOrder", backref="portfolio_transaction")
     ticker = relationship("Ticker", backref="portfolio_transaction")
-    order_type = relationship("OrderType", backref="portfolio_transaction")

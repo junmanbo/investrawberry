@@ -86,7 +86,7 @@ class PortfolioTransactionBase(BaseModel):
     portfolio_order_id: Optional[int] = None
     uuid: Optional[str] = None
     ticker_id: Optional[int] = None
-    order_type_id: Optional[int] = None
+    order_type: Optional[str] = None
     side: Optional[str] = None
     price: Optional[float] = None
     quantity: Optional[float] = None
@@ -97,7 +97,7 @@ class PortfolioTransactionCreate(PortfolioTransactionBase):
     portfolio_order_id: int
     uuid: str
     ticker_id: int
-    order_type_id: int
+    order_type: str
     side: str
     price: float
     quantity: float
