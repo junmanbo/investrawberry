@@ -3,3 +3,5 @@
 htmlcov
 alembic/versions/
 token.dat
+*.mst
+*.zip
