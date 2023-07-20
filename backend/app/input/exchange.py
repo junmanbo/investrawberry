@@ -12,10 +12,10 @@ exchange1 = ExchangeCreate(
     exchange_knm='한국투자증권(국내)',
     open_time=time(hour=9, minute=0, second=0),
     close_time=time(hour=15, minute=30, second=0),
+    is_summer=False,
     min_interval=1,
     min_amount=1,
-    is_summer=False,
-    is_coin=False
+    min_digit=0
 )
 
 exchange2 = ExchangeCreate(
@@ -23,10 +23,10 @@ exchange2 = ExchangeCreate(
     exchange_knm='업비트',
     open_time=time(hour=9, minute=0, second=0),
     close_time=time(hour=8, minute=59, second=59),
+    is_summer=False,
     min_interval=1,
     min_amount=10000,
-    is_summer=False,
-    is_coin=True
+    min_digit=6
 )
 
 exchange3 = ExchangeCreate(
@@ -34,16 +34,19 @@ exchange3 = ExchangeCreate(
     exchange_knm='한국투자증권(해외)',
     open_time=time(hour=23, minute=30, second=0),
     close_time=time(hour=6, minute=0, second=0),
+    is_summer=True,
     min_interval=1,
     min_amount=1,
-    is_summer=True,
-    is_coin=False
+    min_digit=0
 )
 
 # Add the new objects to the database using the CRUD object
 exchange.create(session, obj_in=exchange1)
+print(f"{exchange1} 추가")
 exchange.create(session, obj_in=exchange2)
+print(f"{exchange2} 추가")
 exchange.create(session, obj_in=exchange3)
+print(f"{exchange3} 추가")
 
 # Close the session
 session.close()
