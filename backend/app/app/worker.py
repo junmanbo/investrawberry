@@ -1,9 +1,7 @@
-import ccxt
-import mojito
 import time
 
 from app.core.celery_app import celery_app
-from app import crud, models, schemas
+from app import crud, schemas
 from app.api import deps
 from app.trading import upbit, kis
 
@@ -34,13 +32,14 @@ def place_order(simple_transaction_id) -> str:
         if order_result["state"] == "done":
             st_in.quantity = order_result["executed_volume"]
             st_in.fee = order_result["paid_fee"]
-            st_in.is_filled = True
+            st_in.status = order_result["state"]
             crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
             return order_result
         elif order_result["state"] == "cancel":
-            st = crud.simple_transaction.get(db, simple_transaction_id)
-            if st:
-                crud.simple_transaction.remove(db=db, id=st.id)
+            st_in.quantity = order_result["executed_volume"]
+            st_in.fee = order_result["paid_fee"]
+            st_in.status = order_result["state"]
+            crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
             return order_result
 
         time.sleep(0.5)

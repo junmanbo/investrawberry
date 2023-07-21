@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, Float, Boolean
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, Float
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -15,7 +15,7 @@ class SimpleTransaction(Base):
     price = Column(Float, nullable=False)
     quantity = Column(Float, nullable=False)
     fee = Column(Float)
-    is_filled = Column(Boolean(), default=False)
+    status = Column(String(10), default="wait")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

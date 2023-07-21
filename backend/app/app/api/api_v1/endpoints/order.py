@@ -25,7 +25,7 @@ def simple_order(
     celery_app.send_task("app.worker.place_order", args=[simple_transaction.id])
     return simple_transaction
 
-@router.delete("/simple")
+@router.put("/simple/cancel", response_model=schemas.SimpleTransaction)
 def cancel_order(
     st_id: int,
     db: Session = Depends(deps.get_db),
@@ -44,9 +44,10 @@ def cancel_order(
         client = kis.KIS(key.access_key, key.secret_key, key.account)
 
     # 주문 취소
-    order = client.cancel_order(st.uuid)
+    client.cancel_order(st.uuid)
 
-    # 취소된 매매내역은 삭제
-    crud.simple_transaction.remove(db=db, id=st.id)
+    # 취소된 매매내역 상태 업데이트
+    st_in = schemas.SimpleTransactionUpdate(status="cancel")
+    st = crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
 
-    return order
+    return st

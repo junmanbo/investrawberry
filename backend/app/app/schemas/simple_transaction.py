@@ -11,7 +11,7 @@ class SimpleTransactionBase(BaseModel):
     price: Optional[float] = None
     quantity: Optional[float] = None
     fee: Optional[float] = None
-    is_filled: Optional[bool] = None
+    status: Optional[str] = None
 
 # Properties to receive via API on creation
 class SimpleTransactionCreate(SimpleTransactionBase):

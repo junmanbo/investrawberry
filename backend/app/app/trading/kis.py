@@ -45,6 +45,37 @@ class KIS:
         markets = self.exchange.fetch_symbols()
         return markets
         
+    def place_order(self, params):
+        side = params.side.lower()
+
+        # 주문 유형 번호 설정
+        order_type = params.order_type.lower()
+        if order_type == "limit":
+            order_type = "00"
+        elif order_type == "market":
+            order_type = "01"
+
+        order = self.exchange.create_order(side, params.symbol, params.price, params.quantity, order_type)
+        order["id"] = order["output"]["ODNO"]
+
+        return order
+
+    def check_order(self, uuid):
+        params = {
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+            "INQR_DVSN_1": "1",
+            "INQR_DVSN_2": "0"
+        }
+        orders = self.exchange.fetch_open_order(params)
+        for order in orders:
+            if order["output"]["odno"] == uuid:
+
+        return order
+
+    def cancel_order(self, uuid):
+        order = self.exchange.cancel_order("", uuid, 0, True)
+        return order
 
 
 
