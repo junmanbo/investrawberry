@@ -24,8 +24,6 @@ class SimpleTransactionCreate(SimpleTransactionBase):
 # Properties to receive via API on update
 class SimpleTransactionUpdate(SimpleTransactionBase):
     uuid: str
-    fee: float
-    is_filled: bool
 
 class SimpleTransactionInDBBase(SimpleTransactionBase):
     id: Optional[int] = None
