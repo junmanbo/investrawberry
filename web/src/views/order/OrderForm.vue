@@ -25,6 +25,39 @@
     </div>
     <button @click="placeOrder">주문</button>
   </div>
+  <table>
+    <thead>
+      <tr>
+        <th>주문 번호</th>
+        <th>종목</th>
+        <th>종목코드</th>
+        <th>매수/매도</th>
+        <th>수량</th>
+        <th>진행 중</th>
+        <th>주문 유형</th>
+        <th>주문 가격</th>
+        <th>주문 일시</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="order in orders" :key="order.id">
+        <td>{{ order.id }}</td>
+        <td>{{ order.ticker.ticker_knm }}</td>
+        <td>{{ order.ticker.symbol }}</td>
+        <td>{{ order.side }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.status }}</td>
+        <td>{{ order.order_type }}</td>
+        <td>{{ order.price }}</td>
+        <td>{{ order.created_at && new Date(order.created_at).toISOString().slice(0, 19).replace('T', ' ') }}</td>
+        <td><button @click="cancelOrder(order.id)">취소</button></td>
+      </tr>
+    </tbody>
+  <div v-if="orders.length === 0">
+    진행 중인 주문이 없습니다.
+  </div>
+  </table>
+
   <!-- Alert component -->
   <div v-if="alertStore.alert" class="container">
     <div class="m-3">
@@ -37,7 +70,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useTickerStore } from '@/stores/ticker.store';
 import { useAlertStore } from '@/stores/alert.store'; // Add this line
 import { useOrderStore } from '@/stores/order.store';
@@ -86,6 +119,23 @@ const placeOrder = async () => {
     alertStore.error('주문 요청에 실패하였습니다.');
   }
 };
+
+onMounted(async () => {
+  await orderStore.getOrders();
+});
+
+const orders = computed(() => orderStore.orders);
+
+const cancelOrder = async (orderId) => {
+  try {
+    await orderStore.cancelOrder(orderId);
+    alertStore.success('주문 취소 요청을 보냈습니다.');
+    await orderStore.getOrders();
+  } catch (error) {
+    alertStore.error('주문 취소 요청에 실패하였습니다.');
+  }
+};
+
 </script>
 
 <style scoped>
@@ -96,5 +146,29 @@ const placeOrder = async () => {
 .sell-button {
   background-color: blue;
 }
+table {
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
+th,
+td {
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+th {
+  background-color: #4caf50;
+  color: white;
+}
+
 </style>
 
