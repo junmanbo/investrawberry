@@ -47,7 +47,7 @@ def cancel_order(
     client.cancel_order(st.uuid)
 
     # 취소된 매매내역 상태 업데이트
-    st_in = schemas.SimpleTransactionUpdate(status="cancel")
+    st_in = schemas.SimpleTransactionUpdate(uuid=st.uuid, status="cancel")
     st = crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
 
     return st

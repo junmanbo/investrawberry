@@ -61,17 +61,21 @@ class KIS:
         return order
 
     def check_order(self, uuid):
-        params = {
-            "CTX_AREA_FK100": "",
-            "CTX_AREA_NK100": "",
-            "INQR_DVSN_1": "1",
-            "INQR_DVSN_2": "0"
-        }
-        orders = self.exchange.fetch_open_order(params)
-        for order in orders:
-            if order["output"]["odno"] == uuid:
+        orders = self.exchange.fetch_order(uuid)
 
-        return order
+        # 상태 업데이트
+        if orders["output1"]["cncl_yn"] == "Y" or orders["output1"]["cnccl_yn"] == "y":
+            orders["status"] = "canceled"
+        elif orders["output2"]["tot_ord_qty"] == orders["output2"]["tot_ccld_qty"]:
+            orders["status"] = "closed"
+        else:
+            orders["status"] = "open"
+
+        orders["filled"] = int(orders["output2"]["tot_ccld_qty"]) # 체결 수량
+        orders["fee"]["cost"] = int(orders["output2"]["prsm_tlex_smtl"]) # 수수료+세금
+        orders["average"] = int(orders["output2"]["pchs_avg_pric"]) # 체결 금액
+
+        return orders
 
     def cancel_order(self, uuid):
         order = self.exchange.cancel_order("", uuid, 0, True)

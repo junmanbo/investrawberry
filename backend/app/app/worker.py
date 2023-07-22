@@ -1,4 +1,5 @@
 import time
+from pprint import pprint
 
 from app.core.celery_app import celery_app
 from app import crud, schemas
@@ -22,23 +23,22 @@ def place_order(simple_transaction_id) -> str:
 
     order = client.place_order(st)
 
-    st_in = schemas.SimpleTransactionUpdate(uuid = order["id"])
+    st_in = schemas.SimpleTransactionUpdate(uuid=order["id"], status="open")
     crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
 
     while True:
         order_result = client.check_order(st_in.uuid)
-        order_result = order_result["info"]
-        print(order_result)
-        if order_result["state"] == "done":
-            st_in.quantity = order_result["executed_volume"]
-            st_in.fee = order_result["paid_fee"]
-            st_in.status = order_result["state"]
+        order_result = order_result
+
+        st_in.quantity = order_result["filled"]
+        st_in.fee = order_result["fee"]["cost"]
+        st_in.status = order_result["status"]
+        st_in.price = order_result["average"]
+
+        if order_result["status"] == "done" or order_result["status"] == "closed":
             crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
             return order_result
-        elif order_result["state"] == "cancel":
-            st_in.quantity = order_result["executed_volume"]
-            st_in.fee = order_result["paid_fee"]
-            st_in.status = order_result["state"]
+        elif order_result["status"] == "canceled":
             crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
             return order_result
 

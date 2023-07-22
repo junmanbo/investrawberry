@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# app 모듈 경로 지정
+python3 setup.py install
+
 # Create table
-alembic upgrade head
 alembic revision --autogenerate
 alembic upgrade head
 
