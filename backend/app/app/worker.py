@@ -28,17 +28,20 @@ def place_order(simple_transaction_id) -> str:
 
     while True:
         order_result = client.check_order(st_in.uuid)
-        order_result = order_result
+        print(order_result)
 
         st_in.quantity = order_result["filled"]
         st_in.fee = order_result["fee"]["cost"]
         st_in.status = order_result["status"]
-        st_in.price = order_result["average"]
 
-        if order_result["status"] == "done" or order_result["status"] == "closed":
-            crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
-            return order_result
-        elif order_result["status"] == "canceled":
+        # 취소한 경우 average 가 none 값.
+        if order_result["average"] is None:
+            st_in.price = st.price
+        else:
+            st_in.price = order_result["average"]
+
+        # open 이 아니면 업데이트하고 종료
+        if order_result["status"] != "open":
             crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
             return order_result
 

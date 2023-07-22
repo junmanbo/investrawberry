@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -9,6 +9,12 @@ from app.schemas.simple_transaction import SimpleTransactionCreate, SimpleTransa
 class CRUDSimpleTransaction(CRUDBase[SimpleTransaction, SimpleTransactionCreate, SimpleTransactionUpdate]):
     def get_by_uuid(self, db: Session, *, uuid: str) -> Optional[SimpleTransaction]:
         return db.query(SimpleTransaction).filter(SimpleTransaction.uuid == uuid).first()
+
+    def get_open_transactions(
+        self, db: Session, *, user_id: int
+    ) -> List[SimpleTransaction]:
+        return db.query(self.model).filter(SimpleTransaction.status == "open",
+                                           SimpleTransaction.user_id == user_id).all()
 
 
 simple_transaction = CRUDSimpleTransaction(SimpleTransaction)

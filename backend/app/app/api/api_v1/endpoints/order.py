@@ -10,6 +10,17 @@ from app.trading import upbit, kis
 
 router = APIRouter()
 
+@router.get("/simple/transactions")
+def get_simple_transactions(
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user)
+    ) -> Any:
+    """
+    진행 중인 주문 내역 가져오기
+    """
+    transactions = crud.simple_transaction.get_open_transactions(db=db, user_id=current_user.id)
+    return transactions
+    
 
 @router.post("/simple", response_model=schemas.SimpleTransaction)
 def simple_order(
