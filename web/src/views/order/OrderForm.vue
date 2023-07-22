@@ -9,7 +9,6 @@
       <select id="order-type" v-model="orderType">
         <option value="market">Market</option>
         <option value="limit">Limit</option>
-        <option value="twap">TWAP</option>
       </select>
     </div>
     <div v-if="orderType === 'market'">
@@ -22,13 +21,6 @@
       <input id="quantity" type="number" v-model.number="quantity" />
       <label for="limit-price">지정가격:</label>
       <input id="limit-price" type="number" v-model.number="limitPrice" />
-      <p>추정 가격: {{ estimatedPrice }}</p>
-    </div>
-    <div v-else-if="orderType === 'twap'">
-      <label for="quantity">수량:</label>
-      <input id="quantity" type="number" v-model.number="quantity" />
-      <label for="time">시간(단위 시):</label>
-      <input id="time" type="number" v-model.number="time" />
       <p>추정 가격: {{ estimatedPrice }}</p>
     </div>
     <button @click="placeOrder">주문</button>
@@ -48,7 +40,9 @@
 import { computed, ref } from 'vue';
 import { useTickerStore } from '@/stores/ticker.store';
 import { useAlertStore } from '@/stores/alert.store'; // Add this line
+import { useOrderStore } from '@/stores/order.store';
 
+const orderStore = useOrderStore();
 const tickerStore = useTickerStore();
 const selectedTicker = computed(() => tickerStore.selectedTicker);
 
@@ -65,37 +59,30 @@ const estimatedPrice = computed(() => {
     return quantity.value * selectedTicker.value.price;
   } else if (orderType.value === 'limit') {
     return quantity.value * limitPrice.value;
-  } else if (orderType.value === 'twap') {
-    return quantity.value * selectedTicker.value.price;
   }
 });
 
 const buy = () => {
-  side.value = 'BUY';
+  side.value = 'buy';
 };
 
 const sell = () => {
-  side.value = 'SELL';
+  side.value = 'sell';
 };
 
 const placeOrder = async () => {
   const orderData = {
+    ticker_id: selectedTicker.value.id,
+    order_type: orderType.value,
     side: side.value,
-    orderType: orderType.value,
     quantity: quantity.value,
-    limitPrice: limitPrice.value,
-    time: time.value * 3600,
+    price: limitPrice.value,
   };
-  console.log(orderData);
 
   try {
-    // Add your logic for sending the order request here.
-    // If the request is successful, then the "success" method of "alertStore" will be called.
-
+    await orderStore.postOrder(orderData);
     alertStore.success('주문 요청을 보냈습니다.');
   } catch (error) {
-    // If an error occurs while sending the request, then the "error" method of "alertStore" will be called.
-
     alertStore.error('주문 요청에 실패하였습니다.');
   }
 };
