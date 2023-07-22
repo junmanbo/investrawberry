@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from app.schemas.ticker import Ticker
+
 # Shared properties
 class SimpleTransactionBase(BaseModel):
     user_id: Optional[int] = None
@@ -34,7 +36,7 @@ class SimpleTransactionInDBBase(SimpleTransactionBase):
 
 # Additional properties to return via API
 class SimpleTransaction(SimpleTransactionInDBBase):
-    pass
+    ticker: Ticker
 
 # Additional properties stored in DB
 class SimpleTransactionInDB(SimpleTransactionInDBBase):

@@ -1,5 +1,5 @@
 from typing import Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
 from app.models.simple_transaction import SimpleTransaction
@@ -13,8 +13,8 @@ class CRUDSimpleTransaction(CRUDBase[SimpleTransaction, SimpleTransactionCreate,
     def get_open_transactions(
         self, db: Session, *, user_id: int
     ) -> List[SimpleTransaction]:
-        return db.query(self.model).filter(SimpleTransaction.status == "open",
-                                           SimpleTransaction.user_id == user_id).all()
+        return db.query(self.model).options(joinedload(SimpleTransaction.ticker)).filter(SimpleTransaction.status == "open",
+                                                                                         SimpleTransaction.user_id == user_id).all()
 
 
 simple_transaction = CRUDSimpleTransaction(SimpleTransaction)
