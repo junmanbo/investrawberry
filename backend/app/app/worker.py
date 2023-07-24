@@ -22,6 +22,8 @@ def place_order(simple_transaction_id) -> str:
         client = kis.KIS(key.access_key, key.secret_key, key.account)
 
     order = client.place_order(st)
+    # if order["rt_cd"] != "0":
+    #     return order["msg1"]
 
     st_in = schemas.SimpleTransactionUpdate(uuid=order["id"], status="open")
     crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)

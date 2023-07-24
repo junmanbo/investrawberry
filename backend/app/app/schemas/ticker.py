@@ -12,6 +12,7 @@ class TickerBase(BaseModel):
     currency: Optional[str] = None
     ticker_knm: Optional[str] = None
     marketcap: Optional[int] = None
+    price: Optional[int] = None
     maker_fee: Optional[float] = None
     taker_fee: Optional[float] = None
 
@@ -24,6 +25,8 @@ class TickerCreate(TickerBase):
 
 # Properties to receive via API on update
 class TickerUpdate(TickerBase):
+    marketcap: int
+    price: int
     pass
 
 class TickerInDBBase(TickerBase):

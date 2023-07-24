@@ -15,7 +15,7 @@ class SimpleTransaction(Base):
     price = Column(Float, nullable=False)
     quantity = Column(Float, nullable=False)
     fee = Column(Float)
-    status = Column(String(10), default="wait")
+    status = Column(String(10), default="open")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

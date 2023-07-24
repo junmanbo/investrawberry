@@ -55,32 +55,43 @@ class KIS:
         elif order_type == "market":
             order_type = "01"
 
-        order = self.exchange.create_order(side, params.symbol, params.price, params.quantity, order_type)
-        order["id"] = order["output"]["ODNO"]
-
+        quantity = int(params.quantity)
+        price = int(params.price)
+        order = self.exchange.create_order(side=side, 
+                                           symbol=params.ticker.symbol, 
+                                           price=price, 
+                                           quantity=quantity,
+                                           order_type=order_type)
+        try:
+            order["id"] = order["output"]["ODNO"]
+        except KeyError:
+            return order
         return order
 
     def check_order(self, uuid):
         orders = self.exchange.fetch_order(uuid)
 
+        ord_qty = int(orders["output2"]["tot_ord_qty"])
+        filled_qty = int(orders["output2"]["tot_ccld_qty"])
+
         # 상태 업데이트
-        if orders["output1"]["cncl_yn"] == "Y" or orders["output1"]["cnccl_yn"] == "y":
-            orders["status"] = "canceled"
-        elif orders["output2"]["tot_ord_qty"] == orders["output2"]["tot_ccld_qty"]:
-            orders["status"] = "closed"
+        if ord_qty == filled_qty:
+            if ord_qty == 0:
+                orders["status"] = "canceled"
+            else:
+                orders["status"] = "closed"
         else:
             orders["status"] = "open"
 
         orders["filled"] = int(orders["output2"]["tot_ccld_qty"]) # 체결 수량
-        orders["fee"]["cost"] = int(orders["output2"]["prsm_tlex_smtl"]) # 수수료+세금
-        orders["average"] = int(orders["output2"]["pchs_avg_pric"]) # 체결 금액
+        orders["average"] = int(float(orders["output2"]["pchs_avg_pric"])) # 체결 금액
+        orders["fee"] = {"cost": int(orders["output2"]["prsm_tlex_smtl"])} # 수수료+세금
 
         return orders
 
     def cancel_order(self, uuid):
         order = self.exchange.cancel_order("", uuid, 0, True)
         return order
-
 
 
 if __name__ == "__main__":

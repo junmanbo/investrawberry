@@ -13,6 +13,7 @@ class Ticker(Base):
     currency = Column(String(50), nullable=False)
     ticker_knm = Column(String(50))
     marketcap = Column(Integer)
+    price = Column(Integer)
     maker_fee = Column(Float)
     taker_fee = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
