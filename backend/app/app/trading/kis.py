@@ -1,5 +1,6 @@
 import mojito
-from pprint import pprint
+import os
+from dotenv import load_dotenv
 
 
 class KIS:
@@ -93,9 +94,17 @@ class KIS:
         order = self.exchange.cancel_order("", uuid, 0, True)
         return order
 
+    def get_price(self, symbol: str) -> dict:
+        price = self.exchange.fetch_price(symbol)
+        return price
+
 
 if __name__ == "__main__":
+    load_dotenv()
+    key = os.getenv("KIS_ACCESS")
+    secret = os.getenv("KIS_SECRET")
+    acc_no = os.getenv("KIS_ACCOUNT")
     kis = KIS(key, secret, acc_no)
-    markets = kis.get_market()
-    print(markets.head(5))
-
+    symbol = "005930"
+    price = kis.get_price(symbol)
+    print(price)
