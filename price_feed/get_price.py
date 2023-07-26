@@ -6,9 +6,10 @@ import ccxt
 import redis
 import json
 import mojito
-import pprint
+import os
+from dotenv import load_dotenv
 
-
+from typing import List
 
 print('CCXT Version:', ccxt.__version__)
 
@@ -16,6 +17,7 @@ print('CCXT Version:', ccxt.__version__)
 class UpbitData:
     def __init__(self) -> None:
         self.symbols = self.get_symbols()
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
     async def exchange_loop(self, exchange_id, symbols):
         exchange = getattr(ccxt.pro, exchange_id)()
@@ -38,10 +40,9 @@ class UpbitData:
                 break  # you can break just this one loop if it fails
 
     async def put_data_in_redis(self, symbol, data):
-        redis_client = redis.Redis(host="localhost", port=6379, db=0)
         key = symbol
         value = data
-        redis_client.set(key, value)
+        self.redis_client.set(key, value)
 
     async def main(self):
         exchanges = {'upbit': self.symbols}
@@ -56,32 +57,51 @@ class UpbitData:
 
 
 class KISData:
-    def __init__(self, key, secret) -> None:
-        self.broker_ws = mojito.KoreaInvestmentWS(key, secret, ["H0STCNT0", "H0STASP0"], ["005930", "000660"])
-        self.broker_ws.start()
+    def __init__(self, key, secret, account) -> None:
+        self.key = key
+        self.secret = secret
+        self.account = account
+        self.redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
-    async def watch_data_loop(self):
-        while True:
-            try:
-                print("kis data")
-                data_ = self.broker_ws.get()
-                if data_[0] == '체결':
-                    print(data_[1])
-                elif data_[0] == '호가':
-                    print(data_[1])
-                elif data_[0] == '체잔':
-                    print(data_[1])
-            except Exception as e:
-                print(str(e))
-                break
+    def get_symbols(self) -> List:
+        self.kis_client = mojito.KoreaInvestment(self.key, self.secret, self.account)
+        markets = self.kis_client.fetch_symbols()
+        symbols = [row["단축코드"] for _, row in markets.iterrows()]
+        return symbols
+
+    async def watch_data_loop(self, symbols):
+        try:
+            broker_ws = mojito.KoreaInvestmentWS(self.key, self.secret, ["H0STCNT0"], symbols)
+            broker_ws.start()
+            while True:
+                try:
+                    data_ = broker_ws.get()
+                    data = data_[1]
+                    symbol = data["유가증권단축종목코드"]
+                    print(symbol, data["주식현재가"])
+                    await self.put_data_in_redis(symbol, json.dumps(data, ensure_ascii=False))
+                except Exception as e:
+                    print(f"Inner exception: {e}")
+                    break
+        except Exception as e:
+            print(f"Outer exception: {e}")
 
     async def main(self):
-        await self.watch_data_loop()
+        symbols = self.get_symbols()
+        symbols = symbols[150:250]
+        print(symbols)
+        await self.watch_data_loop(symbols)
+
+    async def put_data_in_redis(self, symbol, data):
+        key = symbol
+        value = data
+        self.redis_client.set(key, value)
 
 
 if __name__ == "__main__":
-    # upbit = UpbitData()
-    # run(upbit.main())
-
-    kis = KISData(key, secret)
+    load_dotenv()
+    key = os.getenv("KIS_KEY")
+    secret = os.getenv("KIS_SECRET")
+    account = os.getenv("KIS_ACCOUNT")
+    kis = KISData(key, secret, account)
     run(kis.main())
