@@ -8,6 +8,7 @@ import json
 import mojito
 import os
 from dotenv import load_dotenv
+import re
 
 from typing import List
 
@@ -66,7 +67,7 @@ class KISData:
     def get_symbols(self) -> List:
         self.kis_client = mojito.KoreaInvestment(self.key, self.secret, self.account)
         markets = self.kis_client.fetch_symbols()
-        symbols = [row["단축코드"] for _, row in markets.iterrows()]
+        symbols = [row["단축코드"] for _, row in markets.iterrows() if re.match(r'^\d', row['단축코드'])]
         return symbols
 
     async def watch_data_loop(self, symbols):
@@ -87,9 +88,8 @@ class KISData:
             print(f"Outer exception: {e}")
 
     async def main(self):
+        # 1세션당 40건 제한으로 사용 불가
         symbols = self.get_symbols()
-        symbols = symbols[150:250]
-        print(symbols)
         await self.watch_data_loop(symbols)
 
     async def put_data_in_redis(self, symbol, data):
@@ -99,9 +99,12 @@ class KISData:
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    key = os.getenv("KIS_KEY")
-    secret = os.getenv("KIS_SECRET")
-    account = os.getenv("KIS_ACCOUNT")
-    kis = KISData(key, secret, account)
-    run(kis.main())
+    # load_dotenv()
+    # key = os.getenv("KIS_KEY")
+    # secret = os.getenv("KIS_SECRET")
+    # account = os.getenv("KIS_ACCOUNT")
+    # kis = KISData(key, secret, account)
+    # run(kis.main())
+
+    upbit = UpbitData()
+    run(upbit.main())
