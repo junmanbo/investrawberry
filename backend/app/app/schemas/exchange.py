@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import time
 from typing import Optional
 
+
 # Shared properties
 class ExchangeBase(BaseModel):
     exchange_nm: Optional[str] = None
@@ -13,6 +14,7 @@ class ExchangeBase(BaseModel):
     min_amount: Optional[int] = None
     min_digit: Optional[int] = None
 
+
 # Properties to receive via API on creation
 class ExchangeCreate(ExchangeBase):
     exchange_nm: str
@@ -21,21 +23,24 @@ class ExchangeCreate(ExchangeBase):
     is_summer: bool
     min_interval: int
 
+
 # Properties to receive via API on update
 class ExchangeUpdate(ExchangeBase):
     pass
+
 
 class ExchangeInDBBase(ExchangeBase):
     id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Additional properties to return via API
 class Exchange(ExchangeInDBBase):
     pass
 
+
 # Additional properties stored in DB
 class ExchangeInDB(ExchangeInDBBase):
     pass
-

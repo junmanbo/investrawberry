@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 # Portfolio
 class PortfolioBase(BaseModel):
     user_id: Optional[int] = None
@@ -8,21 +9,26 @@ class PortfolioBase(BaseModel):
     weight: Optional[int] = None
     rebal_period: Optional[int] = None
 
+
 class PortfolioCreate(PortfolioBase):
     user_id: int
     ticker_id: int
 
+
 class PortfolioUpdate(PortfolioBase):
     pass
+
 
 class PortfolioInDBBase(PortfolioBase):
     id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class Portfolio(PortfolioInDBBase):
     pass
+
 
 class PortfolioInDB(PortfolioInDBBase):
     pass
@@ -33,21 +39,26 @@ class PortfolioMemoBase(BaseModel):
     portfolio_id: Optional[int] = None
     content: Optional[str] = None
 
+
 class PortfolioMemoCreate(PortfolioMemoBase):
     portfolio_id: int
     content: str
 
+
 class PortfolioMemoUpdate(PortfolioMemoBase):
     pass
+
 
 class PortfolioMemoInDBBase(PortfolioMemoBase):
     portfolio_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class PortfolioMemo(PortfolioMemoInDBBase):
     pass
+
 
 class PortfolioMemoInDB(PortfolioMemoInDBBase):
     pass
@@ -60,22 +71,27 @@ class PortfolioOrderBase(BaseModel):
     is_running: Optional[bool] = None
     amount: Optional[int] = None
 
+
 class PortfolioOrderCreate(PortfolioOrderBase):
     portfolio_id: int
     strategy_id: int
     amount: int
 
+
 class PortfolioOrderUpdate(PortfolioOrderBase):
     pass
+
 
 class PortfolioOrderInDBBase(PortfolioOrderBase):
     id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class PortfolioOrder(PortfolioOrderInDBBase):
     pass
+
 
 class PortfolioOrderInDB(PortfolioOrderInDBBase):
     pass
@@ -93,6 +109,7 @@ class PortfolioTransactionBase(BaseModel):
     fee: Optional[float] = None
     is_filled: Optional[bool] = None
 
+
 class PortfolioTransactionCreate(PortfolioTransactionBase):
     portfolio_order_id: int
     uuid: str
@@ -102,18 +119,21 @@ class PortfolioTransactionCreate(PortfolioTransactionBase):
     price: float
     quantity: float
 
+
 class PortfolioTransactionUpdate(PortfolioTransactionBase):
     pass
+
 
 class PortfolioTransactionInDBBase(PortfolioTransactionBase):
     id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class PortfolioTransaction(PortfolioTransactionInDBBase):
     pass
 
+
 class PortfolioTransactionInDB(PortfolioTransactionInDBBase):
     pass
-

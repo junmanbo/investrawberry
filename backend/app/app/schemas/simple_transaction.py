@@ -3,6 +3,7 @@ from typing import Optional
 
 from app.schemas.ticker import Ticker
 
+
 # Shared properties
 class SimpleTransactionBase(BaseModel):
     user_id: Optional[int] = None
@@ -15,6 +16,7 @@ class SimpleTransactionBase(BaseModel):
     fee: Optional[float] = None
     status: Optional[str] = None
 
+
 # Properties to receive via API on creation
 class SimpleTransactionCreate(SimpleTransactionBase):
     ticker_id: int
@@ -23,22 +25,25 @@ class SimpleTransactionCreate(SimpleTransactionBase):
     price: float
     quantity: float
 
+
 # Properties to receive via API on update
 class SimpleTransactionUpdate(SimpleTransactionBase):
     uuid: str
     status: str
 
+
 class SimpleTransactionInDBBase(SimpleTransactionBase):
     id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Additional properties to return via API
 class SimpleTransaction(SimpleTransactionInDBBase):
     ticker: Ticker
 
+
 # Additional properties stored in DB
 class SimpleTransactionInDB(SimpleTransactionInDBBase):
     pass
-

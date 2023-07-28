@@ -1,11 +1,13 @@
 from dotenv import find_dotenv, load_dotenv
+
 load_dotenv(find_dotenv(usecwd=True))
 
 import os
 import secrets
 from typing import Any, Dict, List, Optional
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import AnyHttpUrl, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -26,10 +28,10 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     PROJECT_NAME: str | None = os.getenv("PROJECT_NAME")
-    #SENTRY_DSN: Optional[HttpUrl] = None
+    # SENTRY_DSN: Optional[HttpUrl] = None
 
-    #@validator("SENTRY_DSN", pre=True)
-    #def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
+    # @validator("SENTRY_DSN", pre=True)
+    # def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
     #    if len(v) == 0:
     #        return None
     #    return v
@@ -46,7 +48,7 @@ class Settings(BaseSettings):
             return v
         return PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
+            username=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
