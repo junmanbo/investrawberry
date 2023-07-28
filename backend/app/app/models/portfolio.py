@@ -26,6 +26,7 @@ class PortfolioMemo(Base):
     portfolio_id = Column(Integer, ForeignKey("portfolio.id"), primary_key=True)
     content = Column(Text)
 
+    portfolio = relationship("Portfolio", backref="portfolio_memo")
 
 class PortfolioOrder(Base):
     """포트폴리오 주문 내역"""
