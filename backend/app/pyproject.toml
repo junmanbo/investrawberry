@@ -29,6 +29,7 @@ python-dotenv = "^1.0.0"
 pandas = "^2.0.3"
 mojito2 = {git = "https://github.com/junmanbo/mojito.git"}
 emails = "^0.6"
+redis = "^4.6.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.770"
