@@ -94,8 +94,9 @@ class KIS:
         order = self.exchange.cancel_order("", uuid, 0, True)
         return order
 
-    def get_price(self, symbol: str) -> dict:
-        price = self.exchange.fetch_price(symbol)
+    def get_price(self, symbol: str) -> int:
+        price_data = self.exchange.fetch_price(symbol)
+        price = int(price_data["output"]["stck_prpr"])
         return price
 
 

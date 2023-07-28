@@ -1,6 +1,7 @@
 import ccxt
 from pprint import pprint
-import math
+import redis
+import json
 
 class Upbit:
     def __init__(self, access=None, secret=None):
@@ -8,6 +9,7 @@ class Upbit:
             'apiKey': access,
             'secret': secret
         })
+        self.r = redis.Redis(host="localhost", port=6379, db=0)
 
     def get_balance(self):
         balance = self.exchange.fetch_balance()
@@ -60,6 +62,15 @@ class Upbit:
     def cancel_order(self, uuid):
         order = self.exchange.cancel_order(id=uuid)
         return order
+
+    def get_price(self, symbol, currency):
+        price_data = self.r.get(f"{symbol}/{currency}")
+        if price_data:
+            price_data = json.loads(price_data)
+            price = price_data.get("close")
+        else:
+            price = 0
+        return price
         
 
 if __name__ == "__main__":
