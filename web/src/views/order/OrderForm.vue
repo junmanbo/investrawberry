@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedTicker">
     <h3>{{ selectedTicker.ticker_knm }}</h3>
-    <p>현재가: {{ selectedTicker.price }}</p>
+    <p>현재가: {{ selectedTicker.current_price }} 원</p>
     <button class="buy-button" @click="buy">Buy</button>
     <button class="sell-button" @click="sell">Sell</button>
     <div>

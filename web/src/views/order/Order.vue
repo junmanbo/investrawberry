@@ -64,7 +64,6 @@ watch(search, () => {
 });
 
 const selectTicker = (ticker) => {
-  ticker.price = 1000;
   console.log(ticker);
   tickerStore.selectTicker(ticker); // 선택한 ticker 정보를 저장하는 액션 호출
   router.push('/order/form')
