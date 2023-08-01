@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 
 
 # Portfolio
@@ -13,10 +13,15 @@ class PortfolioBase(BaseModel):
 class PortfolioCreate(PortfolioBase):
     user_id: int
     ticker_id: int
+    weight: int
+    rebal_period: int
 
 
 class PortfolioUpdate(PortfolioBase):
-    pass
+    user_id: int
+    ticker_id: int
+    weight: int
+    rebal_period: int
 
 
 class PortfolioInDBBase(PortfolioBase):
@@ -34,33 +39,33 @@ class PortfolioInDB(PortfolioInDBBase):
     pass
 
 
-# PortfolioMemo
-class PortfolioMemoBase(BaseModel):
+# PortfolioTicker
+class PortfolioTickerBase(BaseModel):
     portfolio_id: Optional[int] = None
     content: Optional[str] = None
 
 
-class PortfolioMemoCreate(PortfolioMemoBase):
+class PortfolioTickerCreate(PortfolioTickerBase):
     portfolio_id: int
     content: str
 
 
-class PortfolioMemoUpdate(PortfolioMemoBase):
+class PortfolioTickerUpdate(PortfolioTickerBase):
     pass
 
 
-class PortfolioMemoInDBBase(PortfolioMemoBase):
+class PortfolioTickerInDBBase(PortfolioTickerBase):
     portfolio_id: int
 
     class Config:
         from_attributes = True
 
 
-class PortfolioMemo(PortfolioMemoInDBBase):
+class PortfolioTicker(PortfolioTickerInDBBase):
     pass
 
 
-class PortfolioMemoInDB(PortfolioMemoInDBBase):
+class PortfolioTickerInDB(PortfolioTickerInDBBase):
     pass
 
 

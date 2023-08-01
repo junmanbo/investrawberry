@@ -3,12 +3,10 @@ from pprint import pprint
 import redis
 import json
 
+
 class Upbit:
     def __init__(self, access=None, secret=None):
-        self.exchange = ccxt.upbit({
-            'apiKey': access,
-            'secret': secret
-        })
+        self.exchange = ccxt.upbit({"apiKey": access, "secret": secret})
         self.r = redis.Redis(host="localhost", port=6379, db=0)
 
     def get_balance(self):
@@ -31,9 +29,9 @@ class Upbit:
             total_balance[currency] = {
                 "amount": amount,
                 "avg_price": avg_price,
-                "notional": amount * avg_price
+                "notional": amount * avg_price,
             }
-            
+
         return total_balance
 
     def get_market(self):
@@ -41,18 +39,21 @@ class Upbit:
         return markets
 
     def place_order(self, params):
-        symbol = f"{params.ticker.symbol}/{params.ticker.currency}" # ccxt 에 맞는 symbol
+        symbol = f"{params.ticker.symbol}/{params.ticker.currency}"  # ccxt 에 맞는 symbol
         side = params.side.lower()
         order_type = params.order_type.lower()
-        
+
         # 수수료 뺀 만큼 주문 Insufficient Balance 방지
+        fee_rate = 0
         if order_type == "market":
             fee_rate = params.ticker.taker_fee
         if order_type == "limit":
             fee_rate = params.ticker.maker_fee
         quantity = params.quantity * (1 - fee_rate)
 
-        order = self.exchange.create_order(symbol, order_type, side, quantity, params.price)
+        order = self.exchange.create_order(
+            symbol, order_type, side, quantity, params.price
+        )
         return order
 
     def check_order(self, uuid):
@@ -71,9 +72,8 @@ class Upbit:
         else:
             price = 0
         return price
-        
+
 
 if __name__ == "__main__":
     upbit = Upbit()
     pprint(upbit.get_balance())
-

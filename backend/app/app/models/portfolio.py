@@ -1,32 +1,45 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, DateTime, Boolean, ForeignKey, Text, Float, String
+from sqlalchemy import (
+    Column,
+    Integer,
+    DateTime,
+    Boolean,
+    ForeignKey,
+    Text,
+    Float,
+    String,
+)
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
 
 
 class Portfolio(Base):
-    """포트폴리오 구성"""
+    """포트폴리오"""
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    ticker_id = Column(Integer, ForeignKey("ticker.id"))
-    weight = Column(Integer, nullable=False, default=100)
     rebal_period = Column(Integer, nullable=False, default=365)
+    memo = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", backref="portfolio")
-    ticker = relationship("Ticker", backref="portfolio")
 
 
-class PortfolioMemo(Base):
-    """포트폴리오별 자유 메모"""
+class PortfolioTicker(Base):
+    """포트폴리오 티커 구성"""
 
-    portfolio_id = Column(Integer, ForeignKey("portfolio.id"), primary_key=True)
-    content = Column(Text)
+    id = Column(Integer, primary_key=True, index=True)
+    portfolio_id = Column(Integer, ForeignKey("portfolio.id"))
+    ticker_id = Column(Integer, ForeignKey("ticker.id"))
+    weight = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    portfolio = relationship("Portfolio", backref="portfolio_memo")
+    portfolio = relationship("Portfolio", backref="portfolio_ticker")
+    ticker = relationship("Ticker", backref="portfolio_ticker")
+
 
 class PortfolioOrder(Base):
     """포트폴리오 주문 내역"""
