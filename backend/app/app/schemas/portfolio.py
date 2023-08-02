@@ -1,31 +1,25 @@
 from pydantic import BaseModel
-from typing import Optional, Dict
 
 
 # Portfolio
 class PortfolioBase(BaseModel):
-    user_id: Optional[int] = None
-    ticker_id: Optional[int] = None
-    weight: Optional[int] = None
-    rebal_period: Optional[int] = None
+    user_id: int | None = None
+    rebal_period: int | None = None
+    memo: str | None = None
 
 
 class PortfolioCreate(PortfolioBase):
     user_id: int
-    ticker_id: int
-    weight: int
     rebal_period: int
 
 
 class PortfolioUpdate(PortfolioBase):
     user_id: int
-    ticker_id: int
-    weight: int
     rebal_period: int
 
 
 class PortfolioInDBBase(PortfolioBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
@@ -41,17 +35,20 @@ class PortfolioInDB(PortfolioInDBBase):
 
 # PortfolioTicker
 class PortfolioTickerBase(BaseModel):
-    portfolio_id: Optional[int] = None
-    content: Optional[str] = None
+    portfolio_id: int | None = None
+    ticker_id: int | None = None
+    weight: int | None = None
 
 
 class PortfolioTickerCreate(PortfolioTickerBase):
     portfolio_id: int
-    content: str
+    ticker_id: int
+    weight: int
 
 
 class PortfolioTickerUpdate(PortfolioTickerBase):
-    pass
+    ticker_id: int
+    weight: int
 
 
 class PortfolioTickerInDBBase(PortfolioTickerBase):
@@ -71,15 +68,13 @@ class PortfolioTickerInDB(PortfolioTickerInDBBase):
 
 # PortfolioOrder
 class PortfolioOrderBase(BaseModel):
-    portfolio_id: Optional[int] = None
-    strategy_id: Optional[int] = None
-    is_running: Optional[bool] = None
-    amount: Optional[int] = None
+    portfolio_id: int | None = None
+    is_running: bool | None = None
+    amount: int | None = None
 
 
 class PortfolioOrderCreate(PortfolioOrderBase):
     portfolio_id: int
-    strategy_id: int
     amount: int
 
 
@@ -88,7 +83,7 @@ class PortfolioOrderUpdate(PortfolioOrderBase):
 
 
 class PortfolioOrderInDBBase(PortfolioOrderBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
@@ -104,15 +99,15 @@ class PortfolioOrderInDB(PortfolioOrderInDBBase):
 
 # PortfolioTransaction
 class PortfolioTransactionBase(BaseModel):
-    portfolio_order_id: Optional[int] = None
-    uuid: Optional[str] = None
-    ticker_id: Optional[int] = None
-    order_type: Optional[str] = None
-    side: Optional[str] = None
-    price: Optional[float] = None
-    quantity: Optional[float] = None
-    fee: Optional[float] = None
-    is_filled: Optional[bool] = None
+    portfolio_order_id: int | None = None
+    uuid: str | None = None
+    ticker_id: int | None = None
+    order_type: str | None = None
+    side: str | None = None
+    price: float | None = None
+    quantity: float | None = None
+    fee: float | None = None
+    is_filled: bool | None = None
 
 
 class PortfolioTransactionCreate(PortfolioTransactionBase):
@@ -130,7 +125,7 @@ class PortfolioTransactionUpdate(PortfolioTransactionBase):
 
 
 class PortfolioTransactionInDBBase(PortfolioTransactionBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True

@@ -24,6 +24,7 @@ class CRUDPortfolio(CRUDBase[Portfolio, PortfolioCreate, PortfolioUpdate]):
     def get_portfolio_by_user(
         self, db: Session, *, skip: int = 0, limit: int = 100, user_id: int
     ) -> List[Portfolio]:
+        """유저가 저장한 포트폴리오 불러오기"""
         return (
             db.query(Portfolio)
             .offset(skip)
@@ -42,7 +43,7 @@ class CRUDPortfolioTicker(
     pass
 
 
-portfolio_memo = CRUDPortfolioTicker(PortfolioTicker)
+portfolio_ticker = CRUDPortfolioTicker(PortfolioTicker)
 
 
 class CRUDPortfolioOrder(

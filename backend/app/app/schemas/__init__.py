@@ -31,7 +31,6 @@ from .simple_transaction import (
     SimpleTransactionInDB,
     SimpleTransactionUpdate,
 )
-from .strategy import Strategy, StrategyCreate, StrategyInDB, StrategyUpdate
 from .ticker import Ticker, TickerCreate, TickerInDB, TickerUpdate
 from .token import Token, TokenPayload
 from .user import User, UserCreate, UserInDB, UserUpdate

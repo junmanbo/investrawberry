@@ -46,14 +46,12 @@ class PortfolioOrder(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     portfolio_id = Column(Integer, ForeignKey("portfolio.id"))
-    strategy_id = Column(Integer, ForeignKey("strategy.id"))
     is_running = Column(Boolean(), nullable=False, default=False)
     amount = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     portfolio = relationship("Portfolio", backref="portfolio_order")
-    strategy = relationship("Strategy", backref="portfolio_order")
 
 
 class PortfolioTransaction(Base):
