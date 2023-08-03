@@ -20,6 +20,8 @@ class Portfolio(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
     rebal_period = Column(Integer, nullable=False, default=365)
+    is_running = Column(Boolean(), nullable=False, default=False)
+    amount = Column(Integer, nullable=False, default=0)
     memo = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -41,26 +43,12 @@ class PortfolioTicker(Base):
     ticker = relationship("Ticker", backref="portfolio_ticker")
 
 
-class PortfolioOrder(Base):
-    """포트폴리오 주문 내역"""
-
-    id = Column(Integer, primary_key=True, index=True)
-    portfolio_id = Column(Integer, ForeignKey("portfolio.id"))
-    is_running = Column(Boolean(), nullable=False, default=False)
-    amount = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    portfolio = relationship("Portfolio", backref="portfolio_order")
-
-
 class PortfolioTransaction(Base):
     """포트폴리오 주문의 매매 내역"""
 
     id = Column(Integer, primary_key=True, index=True)
-    portfolio_order_id = Column(Integer, ForeignKey("portfolio_order.id"))
+    portfolio_ticker_id = Column(Integer, ForeignKey("portfolio_ticker.id"))
     uuid = Column(String, nullable=False)
-    ticker_id = Column(Integer, ForeignKey("ticker.id"))
     order_type = Column(String(10))
     side = Column(String(10), nullable=False)
     price = Column(Float, nullable=False)
@@ -70,5 +58,4 @@ class PortfolioTransaction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    portfolio_order = relationship("PortfolioOrder", backref="portfolio_transaction")
-    ticker = relationship("Ticker", backref="portfolio_transaction")
+    portfolio_ticker = relationship("PortfolioTicker", backref="portfolio_transaction")

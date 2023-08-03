@@ -8,6 +8,5 @@ from .ticker import ticker
 from .portfolio import (
     portfolio,
     portfolio_ticker,
-    portfolio_order,
     portfolio_transaction,
 )

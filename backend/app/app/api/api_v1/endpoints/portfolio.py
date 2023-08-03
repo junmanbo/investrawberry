@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
-from app.trading import upbit, kis
 
 router = APIRouter()
 
@@ -26,50 +25,32 @@ def get_portfolio(
 
 @router.post("", response_model=schemas.Portfolio)
 def create_portfolio(
-    ticker_weight: Dict[int, int],
-    rebal_period: int,
+    pf_data: Dict,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     포트폴리오 구성 생성
+    pf_data: 포트폴리오 구성 + 티커 데이터
     """
     portfolio = schemas.PortfolioCreate
+    portfolio_ticker = schemas.PortfolioTickerCreate
+
+    # portfolio 기본 정보 입력
+    pf_input = pf_data["portfolio"]
     portfolio.user_id = current_user.id
-    portfolio.rebal_period = rebal_period
-    for ticker_id, weight in ticker_weight.items():
-        portfolio.ticker_id = ticker_id
-        portfolio.weight = weight
-        portfolio = crud.portfolio.create(db=db, obj_in=portfolio)
+    portfolio.rebal_period = pf_input.get("rebal_period", None)
+    portfolio.is_running = pf_input.get("is_running", None)
+    portfolio.amount = pf_input.get("amount", None)
+    portfolio.memo = pf_input.get("memo", None)
+    portfolio = crud.portfolio.create(db=db, obj_in=portfolio)
+
+    # 포트폴리오의 티커 구성 입력
+    tickers = pf_data["tickers"]
+    for ticker in tickers:
+        portfolio_ticker.portfolio_id = portfolio.id
+        portfolio_ticker.ticker_id = ticker["ticker_id"]
+        portfolio_ticker.weight = ticker["weight"]
+        portfolio_ticker = crud.portfolio_ticker.create(db=db, obj_in=portfolio_ticker)
 
     return portfolio
-
-
-@router.put("", response_model=schemas.Portfolio)
-def update_portfolio(
-    portfolio: schemas.PortfolioUpdate,
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
-) -> Any:
-    """
-    포트폴리오 구성 수정
-    """
-    st = crud.simple_transaction.get(db=db, id=st_id)
-    exchange = st.ticker.exchange
-    key = crud.exchange_key.get_key_by_owner_exchange(
-        db, owner_id=current_user.id, exchange_id=exchange.id
-    )
-
-    if exchange.exchange_nm == "UPBIT":
-        client = upbit.Upbit(key.access_key, key.secret_key)
-    elif exchange.exchange_nm == "KIS":
-        client = kis.KIS(key.access_key, key.secret_key, key.account)
-
-    # 주문 취소
-    client.cancel_order(st.uuid)
-
-    # 취소된 매매내역 상태 업데이트
-    st_in = schemas.SimpleTransactionUpdate(uuid=st.uuid, status="cancel")
-    st = crud.simple_transaction.update(db=db, db_obj=st, obj_in=st_in)
-
-    return st

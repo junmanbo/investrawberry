@@ -5,17 +5,19 @@ from pydantic import BaseModel
 class PortfolioBase(BaseModel):
     user_id: int | None = None
     rebal_period: int | None = None
+    is_running: bool | None = False
+    amount: int | None = 0
     memo: str | None = None
 
 
 class PortfolioCreate(PortfolioBase):
     user_id: int
-    rebal_period: int
 
 
 class PortfolioUpdate(PortfolioBase):
     user_id: int
     rebal_period: int
+    is_running: bool
 
 
 class PortfolioInDBBase(PortfolioBase):
@@ -47,12 +49,11 @@ class PortfolioTickerCreate(PortfolioTickerBase):
 
 
 class PortfolioTickerUpdate(PortfolioTickerBase):
-    ticker_id: int
-    weight: int
+    pass
 
 
 class PortfolioTickerInDBBase(PortfolioTickerBase):
-    portfolio_id: int
+    id: int | None = None
 
     class Config:
         from_attributes = True
@@ -66,55 +67,21 @@ class PortfolioTickerInDB(PortfolioTickerInDBBase):
     pass
 
 
-# PortfolioOrder
-class PortfolioOrderBase(BaseModel):
-    portfolio_id: int | None = None
-    is_running: bool | None = None
-    amount: int | None = None
-
-
-class PortfolioOrderCreate(PortfolioOrderBase):
-    portfolio_id: int
-    amount: int
-
-
-class PortfolioOrderUpdate(PortfolioOrderBase):
-    pass
-
-
-class PortfolioOrderInDBBase(PortfolioOrderBase):
-    id: int | None = None
-
-    class Config:
-        from_attributes = True
-
-
-class PortfolioOrder(PortfolioOrderInDBBase):
-    pass
-
-
-class PortfolioOrderInDB(PortfolioOrderInDBBase):
-    pass
-
-
 # PortfolioTransaction
 class PortfolioTransactionBase(BaseModel):
-    portfolio_order_id: int | None = None
+    portfolio_ticker_id: int | None = None
     uuid: str | None = None
-    ticker_id: int | None = None
     order_type: str | None = None
     side: str | None = None
     price: float | None = None
     quantity: float | None = None
     fee: float | None = None
-    is_filled: bool | None = None
+    is_fiiled: bool | None = False
 
 
 class PortfolioTransactionCreate(PortfolioTransactionBase):
-    portfolio_order_id: int
+    portfolio_ticker_id: int
     uuid: str
-    ticker_id: int
-    order_type: str
     side: str
     price: float
     quantity: float

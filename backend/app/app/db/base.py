@@ -7,7 +7,6 @@ from app.models.exchange_key import ExchangeKey
 from app.models.portfolio import (
     Portfolio,
     PortfolioTicker,
-    PortfolioOrder,
     PortfolioTransaction,
 )
 from app.models.ticker import Ticker

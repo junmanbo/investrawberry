@@ -5,7 +5,6 @@ from app.crud.base import CRUDBase
 from app.models.portfolio import (
     Portfolio,
     PortfolioTicker,
-    PortfolioOrder,
     PortfolioTransaction,
 )
 from app.schemas.portfolio import (
@@ -13,8 +12,6 @@ from app.schemas.portfolio import (
     PortfolioUpdate,
     PortfolioTickerCreate,
     PortfolioTickerUpdate,
-    PortfolioOrderCreate,
-    PortfolioOrderUpdate,
     PortfolioTransactionCreate,
     PortfolioTransactionUpdate,
 )
@@ -44,15 +41,6 @@ class CRUDPortfolioTicker(
 
 
 portfolio_ticker = CRUDPortfolioTicker(PortfolioTicker)
-
-
-class CRUDPortfolioOrder(
-    CRUDBase[PortfolioOrder, PortfolioOrderCreate, PortfolioOrderUpdate]
-):
-    pass
-
-
-portfolio_order = CRUDPortfolioOrder(PortfolioOrder)
 
 
 class CRUDPortfolioTransaction(
