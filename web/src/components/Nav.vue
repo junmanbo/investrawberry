@@ -3,22 +3,26 @@ import { useAuthStore } from '@/stores';
 
 const authStore = useAuthStore();
 </script>
-
 <template>
-    <nav v-show="authStore.user" class="navbar navbar-expand navbar-light bg-light">
-        <router-link to="/" class="navbar-brand">Investrawberry</router-link>
-        <div class="navbar-nav ml-auto">
-            <router-link to="/balance" class="nav-item nav-link text-dark">자산</router-link>
-            <router-link to="/order" class="nav-item nav-link text-dark">주문</router-link>
-            <router-link to="/mypage" class="nav-item nav-link text-dark">마이페이지</router-link>
-            <button @click="authStore.logout()" class="btn btn-link nav-item nav-link text-dark">로그아웃</button>
+    <div v-show="authStore.user" class="fixed-bottom">
+        <div class="tab-menu">
+            <div class="tab-menu-bg"></div>
+            <router-link to="/" class="tab-menu-item">
+                <i class="fas fa-home"></i>
+            </router-link>
+            <router-link to="/balance" class="tab-menu-item">
+                <i class="fas fa-wallet"></i>
+            </router-link>
+            <router-link to="/order" class="tab-menu-item">
+                <i class="fas fa-shopping-cart"></i>
+            </router-link>
+            <router-link to="/mypage" class="tab-menu-item">
+                <i class="fas fa-user"></i>
+            </router-link>
         </div>
-    </nav>
+    </div>
 </template>
 
-<style scoped>
-.navbar {
-    background-color: white;
-}
+<style>
+@import '@/assets/nav.css';
 </style>
-
