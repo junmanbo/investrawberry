@@ -1,20 +1,19 @@
 from pydantic import BaseModel
-from typing import Optional
 
 from app import schemas
 
 
 # Shared properties
 class TickerBase(BaseModel):
-    exchange_id: Optional[int] = None
-    asset_type_id: Optional[int] = None
-    symbol: Optional[str] = None
-    currency: Optional[str] = None
-    ticker_knm: Optional[str] = None
-    marketcap: Optional[int] = None
-    price: Optional[int] = None
-    maker_fee: Optional[float] = None
-    taker_fee: Optional[float] = None
+    exchange_id: int | None = None
+    asset_type_id: int | None = None
+    symbol: str | None = None
+    currency: str | None = None
+    ticker_knm: str | None = None
+    marketcap: int | None = None
+    price: int | None = None
+    maker_fee: float | None = None
+    taker_fee: float | None = None
 
 
 # Properties to receive via API on creation
@@ -29,11 +28,10 @@ class TickerCreate(TickerBase):
 class TickerUpdate(TickerBase):
     marketcap: int
     price: int
-    pass
 
 
 class TickerInDBBase(TickerBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
