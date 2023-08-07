@@ -1,38 +1,6 @@
 from pydantic import BaseModel
-
-
-# Portfolio
-class PortfolioBase(BaseModel):
-    user_id: int | None = None
-    rebal_period: int | None = None
-    is_running: bool | None = False
-    amount: int | None = 0
-    memo: str | None = None
-
-
-class PortfolioCreate(PortfolioBase):
-    user_id: int
-
-
-class PortfolioUpdate(PortfolioBase):
-    user_id: int
-    rebal_period: int
-    is_running: bool
-
-
-class PortfolioInDBBase(PortfolioBase):
-    id: int | None = None
-
-    class Config:
-        from_attributes = True
-
-
-class Portfolio(PortfolioInDBBase):
-    pass
-
-
-class PortfolioInDB(PortfolioInDBBase):
-    pass
+from typing import List
+from .ticker import Ticker
 
 
 # PortfolioTicker
@@ -60,10 +28,43 @@ class PortfolioTickerInDBBase(PortfolioTickerBase):
 
 
 class PortfolioTicker(PortfolioTickerInDBBase):
-    pass
+    ticker: Ticker
 
 
 class PortfolioTickerInDB(PortfolioTickerInDBBase):
+    pass
+
+
+# Portfolio
+class PortfolioBase(BaseModel):
+    user_id: int | None = None
+    rebal_period: int | None = None
+    is_running: bool | None = False
+    amount: int | None = 0
+    memo: str | None = None
+
+
+class PortfolioCreate(PortfolioBase):
+    user_id: int
+
+
+class PortfolioUpdate(PortfolioBase):
+    rebal_period: int
+    is_running: bool
+
+
+class PortfolioInDBBase(PortfolioBase):
+    id: int | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class Portfolio(PortfolioInDBBase):
+    portfolio_ticker: List[PortfolioTicker] = []
+
+
+class PortfolioInDB(PortfolioInDBBase):
     pass
 
 
