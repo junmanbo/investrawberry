@@ -13,27 +13,29 @@ export default {
             type: Array,
             required: true,
         },
+        size: {
+            type: Number,
+            default: 450,
+        },
     },
     setup(props) {
         const chart = ref(null);
         let svg, pie, arc;
 
         // Set the dimensions and margins of the graph
-        const width = 600;
-        const height = 450;
         const margin = 40;
 
         onMounted(() => {
             // The radius of the pie chart is half the smallest side
-            const radius = Math.min(width, height) / 2 - margin;
+            const radius = props.size / 2 - margin;
 
             // Append SVG element
             svg = d3.select(chart.value)
                 .append('svg')
-                .attr('width', width)
-                .attr('height', height)
+                .attr('width', props.size)
+                .attr('height', props.size)
                 .append('g')
-                .attr('transform', 'translate(' + width / 3 + ',' + height / 2 + ')');
+                .attr('transform', 'translate(' + props.size / 2 + ',' + props.size / 2 + ')');
 
             // Create pie generator
             pie = d3.pie().value(d => d.value);

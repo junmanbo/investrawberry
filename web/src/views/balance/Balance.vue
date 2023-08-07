@@ -1,32 +1,59 @@
 <template>
-  <div>
-    <h3>자산 현황</h3>
-    <div v-if="Object.keys(balanceStore.balances).length === 0">
+  <div class="container">
+    <h3 class="text-center my-3">자산 현황</h3>
+    <div v-if="Object.keys(balanceStore.balances).length === 0" class="text-center">
       등록된 자산이 없습니다.
     </div>
     <div v-else>
-      <PieChart :data="chartData"/>
-      <table class="assets">
-        <thead>
-          <tr>
-            <th>자산</th>
-            <th>비율(%)</th>
-            <th>수량</th>
-            <th>평가금액(Won)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in chartData" :key="index">
-            <td>
-              <span :style="{ backgroundColor: item.color, display: 'inline-block', width: '10px', height: '10px' }"></span>
-              {{ item.label }}
-            </td>
-            <td>{{ item.value }}%</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ Math.floor(item.notional) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="row">
+        <div class="col-md-6">
+          <table>
+            <tbody>
+              <tr>
+                <td><PieChart :data="chartData" :size="150"/></td>
+                <td>
+                  <div style="height: 100px; overflow-y: auto;">
+                    <div v-for="(item, index) in chartData" :key="index" class="d-flex align-items-center mb-2">
+                      <span :style="{ backgroundColor: item.color, display: 'inline-block', width: '20px', height: '20px' }"></span>
+                      <small><span class="ml-2">{{ item.asset }}</span></small>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <table class="table table-striped table-hover mt-3 d-none d-md-block">
+            <thead class="thead-dark">
+              <tr>
+                <th>자산</th>
+                <th>비율(%)</th>
+                <th>수량</th>
+                <th>평가금액(Won)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in chartData" :key="index">
+                <td>{{ item.asset }}<br><small>{{ item.exchange }}</small></td>
+                <td>{{ item.value }}%</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ Math.floor(item.notional) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-md-none">
+            <div v-for="(item, index) in chartData" :key="index" class="card mb-3">
+              <div class="card-header" :style="{ backgroundColor: item.color }">{{ item.asset }}<br><small>{{ item.exchange }}</small></div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">비율: {{ item.value }}%</li>
+                <li class="list-group-item">수량: {{ item.quantity }}</li>
+                <li class="list-group-item">평가금액: {{ Math.floor(item.notional) }} Won</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -78,7 +105,8 @@ function calculateChartData() {
                         colors[`${exchange} ${asset}`] = getRandomColor();
                     }
                     return {
-                        label: `${exchange} ${asset}`,
+                        exchange,
+                        asset,
                         value: weight,
                         color: colors[`${exchange} ${asset}`],
                         quantity: amount.toFixed(6),
@@ -94,24 +122,6 @@ function calculateChartData() {
 
 </script>
 
-<style scoped>
-.assets {
-    margin-top: 20px;
-    border-collapse: collapse;
-}
-.assets th,
-.assets td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-.assets tr:nth-child(even) {background-color: #f2f2f2;}
-.assets tr:hover {background-color: #ddd;}
-.assets th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #4CAF50;
-    color: white;
-}
-</style>
+<style scoped></style>
+
 
