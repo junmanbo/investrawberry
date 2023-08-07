@@ -19,22 +19,41 @@ const hideMenu = () => {
 
 <template>
     <div v-if="user">
-        <div class="greeting">
-            <button class="greeting-icon" @click="showMessage">
-                <div class="greeting-icon-bg"></div>
-                <i class="fas fa-bell"></i>
-            </button>
-            <div class="greeting-alert"></div>
-            <div class="greeting-text"> {{user.token_type}}님, 안녕하세요!</div>
-            <div class="greeting-subtext">오늘도 즐거운 투자하세요 😉</div>
+        <div class="jumbotron text-center">
+            <h1 class="display-4">{{user.token_type}}님, 안녕하세요!</h1>
+            <p class="lead">오늘도 좋은 하루 되세요</p>
         </div>
-        <div v-if="showMenu" @click="hideMenu" class="menu">
-            {{ message }}
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-header">총자산</div>
+                        <div class="card-body">
+                            <h5 class="card-title">₩ 10,627,992.28</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="total-assets">
-            <div class="total-assets-label">총 자산</div>
-            <div class="total-assets-value">₩ 10,627,992.28</div>
-        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="4">관심종목</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><img src="https://mblogthumb-phinf.pstatic.net/MjAxOTA5MDVfMjgy/MDAxNTY3NjY3OTkzNjI3.WhD_wzHJcfzo141UK_81UXfSYbnlpaHbyNZwOEn1BEEg.0khjPkf1MrG78J1on0aWrStqK-zWHpIqYMnhvl4q8oQg.PNG.passtheway/1280px-Samsung_Logo.svg.png?type=w800" alt="sam"></td>
+                    <td>삼성전자<br><small>005930</small></td>
+                    <td>₩70,300</td>
+                </tr>
+                <tr>
+                    <td><img src="https://cdn.senmoney.co.kr/news/photo/202106/10281_10262_4124.jpg" alt="sk"></td>
+                    <td>SK하이닉스<br><small>005660</small></td>
+                    <td>₩115,100</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
