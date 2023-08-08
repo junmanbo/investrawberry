@@ -11,18 +11,7 @@ from app.trading import kis, upbit
 router = APIRouter()
 
 
-@router.get("")
-def search_ticker(
-    keyword: str = Query(...),
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
-) -> List[Dict[str, Any]]:
-    """
-    검색한 티커 목록 조회
-    """
-
-    tickers = crud.ticker.search_ticker_by_query(db, query=keyword)
-    result = []
+def add_current_price(db: Session, current_user, result, tickers):
     for ticker in tickers:
         ticker_data = jsonable_encoder(ticker)
         if ticker.asset_type.asset_nm == "STOCK":
@@ -39,4 +28,35 @@ def search_ticker(
                 ticker.symbol, ticker.currency
             )
         result.append(ticker_data)
+    return result
+
+
+@router.get("")
+async def search_ticker(
+    keyword: str = Query(...),
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> List[Dict[str, Any]]:
+    """
+    검색한 티커 목록 조회
+    """
+
+    tickers = crud.ticker.search_ticker_by_query(db=db, query=keyword)
+    result = []
+    result = add_current_price(db, current_user, result, tickers)
+    return result
+
+
+@router.get("/top")
+async def search_ticker_top(
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> List[Dict[str, Any]]:
+    """
+    시가총액 TOP3 종목
+    """
+
+    tickers = crud.ticker.search_ticker_by_marketcap(db=db)
+    result = []
+    result = add_current_price(db, current_user, result, tickers)
     return result
