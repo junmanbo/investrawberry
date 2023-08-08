@@ -8,7 +8,8 @@ export const useTickerStore = defineStore({
     id: 'ticker',
     state: () => ({
         searchResult: [],
-        selectedTicker: null // 선택한 ticker 정보를 저장하는 상태 추가
+        topTickers: [], // 시가총액 상위 3개의 종목을 저장하는 상태 추가
+        selectedTicker: null
     }),
     actions: {
         async searchTicker(query) {
@@ -23,7 +24,15 @@ export const useTickerStore = defineStore({
                 this.searchResult = [];
             }
         },
-        selectTicker(ticker) { // 선택한 ticker 정보를 저장하는 액션 추가
+        async getTopTickers() { // 시가총액 상위 3개의 종목을 조회하는 액션 추가
+            try {
+                const response = await fetchWrapper.get(`${baseUrl}/top`);
+                this.topTickers = response;
+            } catch (error) {
+                console.error('Error getting top tickers:', error);
+            }
+        },
+        selectTicker(ticker) {
             this.selectedTicker = ticker;
         }
     }
