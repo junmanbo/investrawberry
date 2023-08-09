@@ -1,25 +1,54 @@
 <template>
   <div>
     <h3>주문</h3>
-    <div>
-      <input type="text" v-model="search" placeholder="종목 검색..." />
-      <ul v-if="searchResult.length > 0">
-        <li v-for="ticker in searchResult" :key="ticker.id" @click="selectTicker(ticker)">
+    <div class="form-group">
+      <input type="text" class="form-control" v-model="search" placeholder="종목 검색..." />
+      <ul class="list-group" v-if="searchResult.length > 0 && search.length > 0">
+        <li class="list-group-item" v-for="ticker in searchResult" :key="ticker.id" @click="selectTicker(ticker)">
           {{ ticker.ticker_knm }} - {{ ticker.symbol }}
         </li>
       </ul>
     </div>
-    <div class="stocks">
-      <h4>국내주식 top3</h4>
-      <StockList :stocks="domesticStocks" />
+
+    <!-- 주문 폼 -->
+    <div v-if="selectedTicker">
+      <h3>{{ selectedTicker.ticker_knm }}</h3>
+      <p>현재가: {{ selectedTicker.current_price }} 원</p>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary" @click="buy">Buy</button>
+        <button type="button" class="btn btn-danger" @click="sell">Sell</button>
+      </div>
+      <div class="form-group">
+        <label for="order-type">주문유형:</label>
+        <select id="order-type" v-model="orderType" class="form-control">
+          <option value="market">Market</option>
+          <option value="limit">Limit</option>
+        </select>
+      </div>
+      <div v-if="orderType === 'market' || orderType === 'limit'">
+        <div class="form-group">
+          <label for="quantity">수량:</label>
+          <input id="quantity" type="number" v-model.number="quantity" class="form-control" />
+        </div>
+        <div v-if="orderType === 'limit'">
+          <div class="form-group">
+            <label for="limit-price">지정가격:</label>
+            <input id="limit-price" type="number" v-model.number="limitPrice" class="form-control" />
+          </div>
+        </div>
+        <p>추정 가격: {{ estimatedPrice }}</p>
+        <button @click="placeOrder" class="btn btn-success">주문</button>
+      </div>
     </div>
-    <div class="stocks">
-      <h4>해외주식 top3</h4>
-      <StockList :stocks="foreignStocks" />
-    </div>
-    <div class="stocks">
-      <h4>코인 top3</h4>
-      <StockList :stocks="coins" />
+
+    <!-- Alert component -->
+    <div v-if="alertStore.alert" class="container">
+      <div class="m-3">
+        <div class="alert alert-dismissable fade show" :class="[alertStore.alert.type, 'alert-dismissible']">
+          <button @click="alertStore.clear()" type="button" class="close">×</button>
+          {{alertStore.alert.message}}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,91 +57,84 @@
 import { ref, watch, computed } from 'vue';
 import { debounce } from 'lodash';
 import { useTickerStore } from '@/stores/ticker.store';
-import StockList from '@/views/order/StockList.vue';
 import { useRouter } from 'vue-router';
-
-let search = ref('');
+import { useOrderStore } from '@/stores/order.store';
+import { useAlertStore } from '@/stores/alert.store'; // Add this line
 
 const tickerStore = useTickerStore();
 const searchResult = computed(() => tickerStore.searchResult);
+const orderStore = useOrderStore();
+const alertStore = useAlertStore();
+
+let search = ref('');
 const router = useRouter();
-
-let domesticStocks = ref([
-  { name: '삼성전자', price: 70000, rate: '+1.2%' },
-  { name: 'lg에너지솔루션', price: 550000, rate: '-2.5%' },
-  { name: 'sk하이닉스', price: 113400, rate: '+2.8%' }
-]);
-
-let foreignStocks = ref([
-  { name: '애플', price: 187.66, rate: '-0.5%' },
-  { name: '마이크로소프트', price: 327.64, rate: '-1.26%' },
-  { name: '알파벳', price: 116.94, rate: '+0.06%' }
-]);
-
-let coins = ref([
-  { name: '비트코인', price: 40052000, rate: '0%' },
-  { name: '이더리움', price: 2458000, rate: '-0.69%' },
-  { name: '리플', price: 623, rate: '-0.8%' }
-]);
+const selectedTicker = ref(null);
+const orderType = ref('market');
+const quantity = ref(0);
+const limitPrice = ref(0);
+const side = ref(null);
 
 const searchTicker = debounce(() => {
   tickerStore.searchTicker(search.value);
 }, 500);
 
 watch(search, () => {
-  searchTicker();
+  if (!search) {
+    // 검색 키워드가 비어 있으면 선택된 종목과 검색 결과를 초기화합니다.
+    selectedTicker.value = null;
+    tickerStore.clearSearchResult();
+  } else {
+    searchTicker();
+  }
 });
 
 const selectTicker = (ticker) => {
-  console.log(ticker);
-  tickerStore.selectTicker(ticker); // 선택한 ticker 정보를 저장하는 액션 호출
-  router.push('/order/form')
+  selectedTicker.value = ticker;
+};
+
+const estimatedPrice = computed(() => {
+  if (!selectedTicker.value) return 0;
+  if (orderType.value === 'market') {
+    return quantity.value * selectedTicker.value.current_price;
+  } else if (orderType.value === 'limit') {
+    return quantity.value * limitPrice.value;
+  }
+});
+
+const buy = () => {
+  side.value = 'buy';
+};
+
+const sell = () => {
+  side.value = 'sell';
+};
+
+const placeOrder = async () => {
+  if (!selectedTicker.value) return;
+
+  const orderData = {
+    ticker_id: selectedTicker.value.id,
+    order_type: orderType.value,
+    side: side.value,
+    quantity: quantity.value,
+    price: limitPrice.value,
+  };
+
+  try {
+    await orderStore.postOrder(orderData);
+    alertStore.success('주문 요청을 보냈습니다.');
+  } catch (error) {
+    alertStore.error('주문 요청에 실패하였습니다.');
+  }
 };
 
 </script>
 
 <style scoped>
-.stocks {
-  margin-top: 20px;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.modal-content {
-background-color:white;
-padding :20px;
-border-radius :10px;
-}
-
-ul {
-position:absolute;
-background-color:white;
-width :100%;
-border :1px solid #ccc;
-border-radius :4px;
-padding :0;
-margin :0;
-box-shadow :0px2px10px rgba(0,0,0,.2);
-list-style:none;
-z-index :1;
-}
-
-li{
-padding :10px;
-}
-
-li:hover{
-background-color:#f0f0f0;
+@media (max-width: 576px) {
+  .form-group {
+    margin-bottom: 1rem;
+  }
 }
 </style>
 
