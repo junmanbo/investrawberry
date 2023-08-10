@@ -25,7 +25,9 @@ def get_balance_all(
             client = upbit.Upbit(key.access_key, key.secret_key)
         elif key.exchange.exchange_nm == "KIS":
             client = kis.KIS(key.access_key, key.secret_key, key.account)
+        else:
+            return {"message": "Exchange is not found."}
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
-            
+
     return total_balance
