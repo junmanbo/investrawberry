@@ -8,7 +8,7 @@ authors = ["Jun <chchdelm3@icloud.com>"]
 python = "^3.10"
 ccxt = "^4.0.40"
 python-dotenv = "^1.0.0"
-mojito2 = {git = "https://github.com/junmanbo/mojito.git"}
+mojito2 = {git = "https://github.com/junmanbo/mojito.git", branch="main"}
 redis = "^4.6.0"
 pandas = "^2.0.3"
 
