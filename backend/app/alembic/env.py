@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+from dotenv import load_dotenv
 import os
 
 from alembic import context
@@ -29,10 +30,9 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-from dotenv import load_dotenv
-import os
 
 load_dotenv()
+
 
 def get_url():
     user = os.getenv("POSTGRES_USER", "postgres")
@@ -73,7 +73,9 @@ def run_migrations_online():
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
-        configuration, prefix="sqlalchemy.", poolclass=pool.NullPool,
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
