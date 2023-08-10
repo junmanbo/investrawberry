@@ -5,22 +5,25 @@ from app.crud.base import CRUDBase
 from app.models.portfolio import (
     Portfolio,
     PortfolioTicker,
-    PortfolioTransaction,
 )
 from app.schemas.portfolio import (
     PortfolioCreate,
     PortfolioUpdate,
     PortfolioTickerCreate,
     PortfolioTickerUpdate,
-    PortfolioTransactionCreate,
-    PortfolioTransactionUpdate,
 )
 
 
 class CRUDPortfolio(CRUDBase[Portfolio, PortfolioCreate, PortfolioUpdate]):
     def get_portfolio_by_user(self, db: Session, *, user_id: int) -> List[Portfolio]:
-        """유저가 저장한 포트폴리오 불러오기"""
+        """유저가 저장한 포트폴리오 조회"""
         return db.query(Portfolio).filter(Portfolio.user_id == user_id).all()
+
+    def get_portfolio_running(
+        self, db: Session, *, is_running: bool
+    ) -> List[Portfolio]:
+        """실행중인 포트폴리오 조회"""
+        return db.query(Portfolio).filter_by(is_running=is_running).all()
 
 
 portfolio = CRUDPortfolio(Portfolio)
@@ -39,16 +42,11 @@ class CRUDPortfolioTicker(
             .first()
         )
 
+    def get_by_portfolio_id(
+        self, db: Session, *, portfolio_id: int
+    ) -> List[PortfolioTicker]:
+        """포트폴리오 id로 조회"""
+        return db.query(PortfolioTicker).filter_by(portfolio_id=portfolio_id).all()
+
 
 portfolio_ticker = CRUDPortfolioTicker(PortfolioTicker)
-
-
-class CRUDPortfolioTransaction(
-    CRUDBase[
-        PortfolioTransaction, PortfolioTransactionCreate, PortfolioTransactionUpdate
-    ]
-):
-    pass
-
-
-portfolio_transaction = CRUDPortfolioTransaction(PortfolioTransaction)

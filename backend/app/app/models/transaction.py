@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
 
-class SimpleTransaction(Base):
+class Transaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"))
     ticker_id = Column(Integer, ForeignKey("ticker.id"))
@@ -19,5 +19,5 @@ class SimpleTransaction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user = relationship("User", backref="simple_transaction")
-    ticker = relationship("Ticker", backref="simple_transaction")
+    user = relationship("User", backref="transaction")
+    ticker = relationship("Ticker", backref="transaction")

@@ -7,7 +7,6 @@ from app.models.exchange_key import ExchangeKey
 from app.models.portfolio import (
     Portfolio,
     PortfolioTicker,
-    PortfolioTransaction,
 )
 from app.models.ticker import Ticker
 from app.models.user import User

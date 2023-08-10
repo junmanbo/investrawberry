@@ -16,16 +16,12 @@ from .portfolio import (
     PortfolioTickerCreate,
     PortfolioTickerInDB,
     PortfolioTickerUpdate,
-    PortfolioTransaction,
-    PortfolioTransactionCreate,
-    PortfolioTransactionInDB,
-    PortfolioTransactionUpdate,
 )
-from .simple_transaction import (
-    SimpleTransaction,
-    SimpleTransactionCreate,
-    SimpleTransactionInDB,
-    SimpleTransactionUpdate,
+from .transaction import (
+    Transaction,
+    TransactionCreate,
+    TransactionInDB,
+    TransactionUpdate,
 )
 from .ticker import Ticker, TickerCreate, TickerInDB, TickerUpdate
 from .token import Token, TokenPayload

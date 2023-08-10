@@ -6,8 +6,7 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     Text,
-    Float,
-    String,
+    Date,
 )
 from sqlalchemy.orm import relationship
 
@@ -23,6 +22,7 @@ class Portfolio(Base):
     is_running = Column(Boolean(), nullable=False, default=False)
     amount = Column(Integer, nullable=False, default=0)
     memo = Column(Text)
+    rebal_dt = Column(Date)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -41,21 +41,3 @@ class PortfolioTicker(Base):
 
     portfolio = relationship("Portfolio", backref="portfolio_ticker")
     ticker = relationship("Ticker", backref="portfolio_ticker")
-
-
-class PortfolioTransaction(Base):
-    """포트폴리오 주문의 매매 내역"""
-
-    id = Column(Integer, primary_key=True, index=True)
-    portfolio_ticker_id = Column(Integer, ForeignKey("portfolio_ticker.id"))
-    uuid = Column(String, nullable=False)
-    order_type = Column(String(10))
-    side = Column(String(10), nullable=False)
-    price = Column(Float, nullable=False)
-    quantity = Column(Float, nullable=False)
-    fee = Column(Float)
-    is_fiiled = Column(Boolean(), nullable=False, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    portfolio_ticker = relationship("PortfolioTicker", backref="portfolio_transaction")

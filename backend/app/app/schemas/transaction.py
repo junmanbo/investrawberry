@@ -5,7 +5,7 @@ from app.schemas.ticker import Ticker
 
 
 # Shared properties
-class SimpleTransactionBase(BaseModel):
+class TransactionBase(BaseModel):
     user_id: Optional[int] = None
     ticker_id: Optional[int] = None
     uuid: Optional[str] = None
@@ -18,7 +18,7 @@ class SimpleTransactionBase(BaseModel):
 
 
 # Properties to receive via API on creation
-class SimpleTransactionCreate(SimpleTransactionBase):
+class TransactionCreate(TransactionBase):
     ticker_id: int
     order_type: str
     side: str
@@ -27,12 +27,12 @@ class SimpleTransactionCreate(SimpleTransactionBase):
 
 
 # Properties to receive via API on update
-class SimpleTransactionUpdate(SimpleTransactionBase):
+class TransactionUpdate(TransactionBase):
     uuid: str
     status: str
 
 
-class SimpleTransactionInDBBase(SimpleTransactionBase):
+class TransactionInDBBase(TransactionBase):
     id: Optional[int] = None
 
     class Config:
@@ -40,10 +40,10 @@ class SimpleTransactionInDBBase(SimpleTransactionBase):
 
 
 # Additional properties to return via API
-class SimpleTransaction(SimpleTransactionInDBBase):
+class Transaction(TransactionInDBBase):
     ticker: Ticker
 
 
 # Additional properties stored in DB
-class SimpleTransactionInDB(SimpleTransactionInDBBase):
+class TransactionInDB(TransactionInDBBase):
     pass
