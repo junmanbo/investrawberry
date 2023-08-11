@@ -6,15 +6,15 @@ from app.schemas.ticker import Ticker
 
 # Shared properties
 class TransactionBase(BaseModel):
-    user_id: Optional[int] = None
-    ticker_id: Optional[int] = None
-    uuid: Optional[str] = None
-    order_type: Optional[str] = None
-    side: Optional[str] = None
-    price: Optional[float] = None
-    quantity: Optional[float] = None
-    fee: Optional[float] = None
-    status: Optional[str] = None
+    user_id: int | None = None
+    ticker_id: int | None = None
+    uuid: str | None = None
+    order_type: str | None = None
+    side: str | None = None
+    price: float | None = None
+    quantity: float | None = None
+    fee: float | None = None
+    status: str | None = None
 
 
 # Properties to receive via API on creation
@@ -33,7 +33,7 @@ class TransactionUpdate(TransactionBase):
 
 
 class TransactionInDBBase(TransactionBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
