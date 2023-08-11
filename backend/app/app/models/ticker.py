@@ -8,7 +8,7 @@ from app.db.base_class import Base
 class Ticker(Base):
     id = Column(Integer, primary_key=True, index=True)
     exchange_id = Column(Integer, ForeignKey("exchange.id"))
-    asset_type = Column(Enum("kr_stock", "us_stock", "crypto"), nullable=False)
+    asset_type = Column(Enum("kr_stock", "us_stock", "crypto", name="asset_type"))
     symbol = Column(String(50), nullable=False, unique=True)
     currency = Column(String(50), nullable=False)
     ticker_knm = Column(String(50))
