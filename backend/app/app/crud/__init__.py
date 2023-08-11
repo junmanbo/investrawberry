@@ -3,7 +3,6 @@ from .exchange import exchange
 from .exchange_key import exchange_key
 from .transaction import transaction
 from .ticker import ticker
-from .asset_type import asset_type
 from .ticker import ticker
 from .portfolio import (
     portfolio,

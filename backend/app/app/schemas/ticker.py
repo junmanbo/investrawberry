@@ -1,12 +1,10 @@
 from pydantic import BaseModel
 
-from app import schemas
-
 
 # Shared properties
 class TickerBase(BaseModel):
     exchange_id: int | None = None
-    asset_type_id: int | None = None
+    asset_type: str | None = None
     symbol: str | None = None
     currency: str | None = None
     ticker_knm: str | None = None
@@ -19,7 +17,7 @@ class TickerBase(BaseModel):
 # Properties to receive via API on creation
 class TickerCreate(TickerBase):
     exchange_id: int
-    asset_type_id: int
+    asset_type: str
     symbol: str
     currency: str
 

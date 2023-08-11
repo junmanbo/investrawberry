@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Date,
+    CheckConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -41,3 +42,7 @@ class PortfolioTicker(Base):
 
     portfolio = relationship("Portfolio", backref="portfolio_ticker")
     ticker = relationship("Ticker", backref="portfolio_ticker")
+
+    __table_args__ = (
+        CheckConstraint((weight >= 1) & (weight <= 100), name="check_weight"),
+    )
