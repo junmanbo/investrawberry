@@ -14,7 +14,7 @@ router = APIRouter()
 def add_current_price(db: Session, current_user, result, tickers):
     for ticker in tickers:
         ticker_data = jsonable_encoder(ticker)
-        if ticker.asset_type.asset_nm == "STOCK":
+        if ticker.asset_type == "kr_stock":
             exchange_key = crud.exchange_key.get_key_by_owner_exchange(
                 db, owner_id=current_user.id, exchange_id=ticker.exchange_id
             )
@@ -22,7 +22,7 @@ def add_current_price(db: Session, current_user, result, tickers):
                 exchange_key.access_key, exchange_key.secret_key, exchange_key.account
             )
             ticker_data["current_price"] = client.get_price(ticker.symbol)
-        elif ticker.asset_type.asset_nm == "CRYPTO":
+        elif ticker.asset_type == "crypto":
             client = upbit.Upbit()
             ticker_data["current_price"] = client.get_price(
                 ticker.symbol, ticker.currency
