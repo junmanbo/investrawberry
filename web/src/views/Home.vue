@@ -1,8 +1,8 @@
 <template>
     <div v-if="user">
         <div class="jumbotron text-center">
-            <h1 class="display-4">{{user.token_type}}님, 안녕하세요!</h1>
-            <p class="lead">오늘도 좋은 하루 되세요</p>
+            <h1 class="display-8">{{user.user_name}}님, 안녕하세요!</h1>
+            <p class="lead">오늘도 투자 성공하세요 :)</p>
         </div>
         <div class="container">
             <div class="row">
@@ -25,7 +25,7 @@
             <tbody>
                 <tr v-for="(ticker, index) in domesticStockTopTickers" :key="index">
                     <td>{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
-                    <td>{{ticker.current_price.toLocaleString()}}</td>
+                    <td>{{ticker.current_price.toLocaleString()}} 원</td>
                 </tr>
             </tbody>
         </table>
@@ -38,7 +38,7 @@
             <tbody>
                 <tr v-for="(ticker, index) in coinTopTickers" :key="index">
                     <td>{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
-                    <td>{{ticker.current_price.toLocaleString()}}</td>
+                    <td>{{ticker.current_price.toLocaleString()}} 원</td>
                 </tr>
             </tbody>
         </table>
@@ -73,11 +73,11 @@ const totalBalance = computed(() => {
 });
 
 const domesticStockTopTickers = computed(() => {
-    return topTickers.value.filter(ticker => ticker.asset_type_id === 1);
+    return topTickers.value.filter(ticker => ticker.asset_type === 'kr_stock');
 });
 
 const coinTopTickers = computed(() => {
-    return topTickers.value.filter(ticker => ticker.asset_type_id === 2);
+    return topTickers.value.filter(ticker => ticker.asset_type === 'crypto');
 });
 
 const message = ref('');

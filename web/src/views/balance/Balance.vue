@@ -115,6 +115,7 @@ function calculateChartData() {
                 })
                 .filter(({ value }) => value > 0)
         );
+        chartData.value.sort((a, b) => b.notional - a.notional);
     } catch (error) {
         console.error(error);
     }
