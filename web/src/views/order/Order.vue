@@ -1,56 +1,64 @@
 <template>
   <div>
-    <h3>주문</h3>
-    <div class="form-group">
-      <input type="text" class="form-control" v-model="search" placeholder="종목 검색..." />
-      <ul class="list-group" v-if="searchResult.length > 0 && search.length > 0">
-        <li class="list-group-item" v-for="ticker in searchResult" :key="ticker.id" @click="selectTicker(ticker)">
-          {{ ticker.ticker_knm }} - {{ ticker.symbol }}
-        </li>
-      </ul>
-    </div>
-
-    <!-- 주문 폼 -->
-    <div v-if="selectedTicker">
-      <h3>{{ selectedTicker.ticker_knm }}</h3>
-      <p>현재가: {{ selectedTicker.current_price }} 원</p>
-      <div class="btn-group" role="group">
-        <button type="button" class="btn btn-primary" @click="buy">Buy</button>
-        <button type="button" class="btn btn-danger" @click="sell">Sell</button>
-      </div>
-      <div class="form-group">
-        <label for="order-type">주문유형:</label>
-        <select id="order-type" v-model="orderType" class="form-control">
-          <option value="market">Market</option>
-          <option value="limit">Limit</option>
-        </select>
-      </div>
-      <div v-if="orderType === 'market' || orderType === 'limit'">
+    <h5>단순 주문</h5>
+    <OrderMenu :selected-menu="selectedMenu" @update:selected-menu="selectedMenu = $event" />
+      <div v-if="selectedMenu === 'SIMPLE'">
         <div class="form-group">
-          <label for="quantity">수량:</label>
-          <input id="quantity" type="number" v-model.number="quantity" class="form-control" />
+          <div class="input-group">
+            <input type="text" class="form-control" v-model="search" placeholder="종목 검색..." />
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" @click="search = ''">x</button>
+            </div>
+          </div>
+          <ul class="list-group" v-if="searchResult.length > 0 && search.length > 0">
+            <li class="list-group-item" v-for="ticker in searchResult" :key="ticker.id" @click="selectTicker(ticker)">
+              {{ ticker.ticker_knm }} - {{ ticker.symbol }}
+            </li>
+          </ul>
         </div>
-        <div v-if="orderType === 'limit'">
+
+        <!-- 주문 폼 -->
+        <div v-if="selectedTicker">
+          <h3>{{ selectedTicker.ticker_knm }}</h3>
+          <p>현재가: {{ selectedTicker.current_price }} 원</p>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary" @click="buy">Buy</button>
+            <button type="button" class="btn btn-danger" @click="sell">Sell</button>
+          </div>
           <div class="form-group">
-            <label for="limit-price">지정가격:</label>
-            <input id="limit-price" type="number" v-model.number="limitPrice" class="form-control" />
+            <label for="order-type">주문유형:</label>
+            <select id="order-type" v-model="orderType" class="form-control">
+              <option value="market">Market</option>
+              <option value="limit">Limit</option>
+            </select>
+          </div>
+          <div v-if="orderType === 'market' || orderType === 'limit'">
+            <div class="form-group">
+              <label for="quantity">수량:</label>
+              <input id="quantity" type="number" v-model.number="quantity" class="form-control" />
+            </div>
+            <div v-if="orderType === 'limit'">
+              <div class="form-group">
+                <label for="limit-price">지정가격:</label>
+                <input id="limit-price" type="number" v-model.number="limitPrice" class="form-control" />
+              </div>
+            </div>
+            <p>추정 가격: {{ estimatedPrice }}</p>
+            <button @click="placeOrder" class="btn btn-success">주문</button>
           </div>
         </div>
-        <p>추정 가격: {{ estimatedPrice }}</p>
-        <button @click="placeOrder" class="btn btn-success">주문</button>
-      </div>
-    </div>
 
-    <!-- Alert component -->
-    <div v-if="alertStore.alert" class="container">
-      <div class="m-3">
-        <div class="alert alert-dismissable fade show" :class="[alertStore.alert.type, 'alert-dismissible']">
-          <button @click="alertStore.clear()" type="button" class="close">×</button>
-          {{alertStore.alert.message}}
+        <!-- Alert component -->
+        <div v-if="alertStore.alert" class="container">
+          <div class="m-3">
+            <div class="alert alert-dismissable fade show" :class="[alertStore.alert.type, 'alert-dismissible']">
+              <button @click="alertStore.clear()" type="button" class="close">×</button>
+              {{alertStore.alert.message}}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -60,6 +68,7 @@ import { useTickerStore } from '@/stores/ticker.store';
 import { useRouter } from 'vue-router';
 import { useOrderStore } from '@/stores/order.store';
 import { useAlertStore } from '@/stores/alert.store'; // Add this line
+import { OrderMenu } from '@/views/order';
 
 const tickerStore = useTickerStore();
 const searchResult = computed(() => tickerStore.searchResult);
@@ -73,6 +82,8 @@ const orderType = ref('market');
 const quantity = ref(0);
 const limitPrice = ref(0);
 const side = ref(null);
+
+const selectedMenu = ref('SIMPLE');
 
 const searchTicker = debounce(() => {
   tickerStore.searchTicker(search.value);
