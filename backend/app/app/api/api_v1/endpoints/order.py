@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -11,7 +11,7 @@ from app.trading import upbit, kis
 router = APIRouter()
 
 
-@router.get("/simple/transactions", response_model=schemas.Transaction)
+@router.get("/simple/transactions", response_model=List[schemas.Transaction])
 async def get_transactions(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
