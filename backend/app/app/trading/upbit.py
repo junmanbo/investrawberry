@@ -22,6 +22,7 @@ class Upbit:
             avg_price = int(float(balance.get("avg_buy_price")))
             amount = float(balance.get("balance"))
             notional = amount * avg_price
+            price = self.get_price(symbol=currency)
             if currency == "KRW":
                 avg_price = 1
             elif notional < 100:
@@ -30,6 +31,7 @@ class Upbit:
                 "amount": amount,
                 "avg_price": avg_price,
                 "notional": amount * avg_price,
+                "price": price,
             }
 
         return total_balance
@@ -64,11 +66,13 @@ class Upbit:
         order = self.exchange.cancel_order(id=uuid)
         return order
 
-    def get_price(self, symbol, currency):
+    def get_price(self, symbol, currency="KRW"):
         price_data = self.r.get(f"{symbol}/{currency}")
         if price_data:
             price_data = json.loads(price_data)
             price = price_data.get("close")
+        elif symbol == "KRW":
+            price = 1
         else:
             price = 0
         return price
