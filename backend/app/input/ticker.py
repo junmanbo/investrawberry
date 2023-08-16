@@ -75,7 +75,9 @@ for market in markets:
                     # Add the new Ticker object to the database using the CRUD object
                     crud.ticker.create(db=db, obj_in=ticker_in)
                 else:
-                    ticker_in = schemas.TickerUpdate(marketcap=marketcap, price=price)
+                    ticker_in = schemas.TickerUpdate(
+                        marketcap=marketcap, price=price, asset_type="crypto"
+                    )
                     crud.ticker.update(db=db, db_obj=ticker, obj_in=ticker_in)
                 print(
                     f"{symbol} - name: {market['info']['korean_name']} cap: {marketcap} price: {price}"
@@ -125,8 +127,7 @@ for idx, row in markets.iterrows():
         crud.ticker.create(db, obj_in=ticker_in)
     else:
         ticker_in = schemas.TickerUpdate(
-            marketcap=row["시가총액"],
-            price=row["기준가"],
+            marketcap=row["시가총액"], price=row["기준가"], asset_type="kr_stock"
         )
         crud.ticker.update(db=db, db_obj=ticker, obj_in=ticker_in)
     print(f"{row['단축코드']} - {row['한글명']} cap: {row['시가총액']} price: {row['기준가']}")
