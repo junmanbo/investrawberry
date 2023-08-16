@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from typing import List
+from datetime import date
+
 from .ticker import Ticker
 
 
@@ -42,7 +44,7 @@ class PortfolioBase(BaseModel):
     is_running: bool | None = False
     amount: int | None = 0
     memo: str | None = None
-    rebal_dt: str | None = None
+    rebal_dt: date | None = None
 
 
 class PortfolioCreate(PortfolioBase):
