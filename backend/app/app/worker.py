@@ -78,23 +78,6 @@ def portfolio_order(pf: models.Portfolio) -> Any:
     if pf_tickers is None:
         return {"message": "Portfolio Tickers are not found."}
 
-    # 포트폴리오에 있는 티커의 총 금액 구하기
-    total_amount = 0
-    for pf_ticker in pf_tickers:
-        exchange = pf_ticker.ticker.exchange
-        ticker = pf_ticker.ticker
-        try:
-            current_amount = total_balance[exchange.exchange_nm][ticker.symbol][
-                "notional"
-            ]
-        except TypeError as e:
-            print(e)
-            current_amount = 0
-
-        total_amount += current_amount
-
-    # total_amount = 0 or current_amount = 0 인 경우 (처음)
-
     # 총 금액으로 각 티커의 비중을 계산하고 필요한 만큼 매매
     for pf_ticker in pf_tickers:
         exchange = pf_ticker.ticker.exchange
@@ -108,26 +91,31 @@ def portfolio_order(pf: models.Portfolio) -> Any:
             print(e)
             current_amount = 0
 
-        if current_amount == 0:
-            ticker_amount = int(pf.amount * pf_ticker.weight / 100)
-            ticker_quantity = ticker_amount / current_price
-            transaction_in = schemas.TransactionCreate(
-                user_id=pf.user_id,
-                ticker_id=ticker.id,
-                side="buy",
-                price=current_price,
-                quantity=ticker_quantity,
-                order_type="market",
-            )
-            crud.transaction.create(db=db, obj_in=transaction_in)
-        else:
-            current_weight = current_amount / total_amount * 100
-            if current_weight > pf_ticker.weight:
-                trade_amount = (
-                    current_amount * (current_weight - pf_ticker.weight) / 100
-                )
-                trade_quantity = trade_amount / current_price
+        current_price = total_balance[exchange.exchange_nm][ticker.symbol][
+            "price"
+        ]  # 현재가
+        current_weight = current_amount / pf.amount * 100  # 현재 비중
 
-        print(ticker_amount)
+        diff_weight = current_weight - pf_ticker.weight  # 현재 비중과 포트폴리오 비중 차이 (%단위)
+        diff_amount = abs(diff_weight) * pf.amount / 100  # 비중 차이에 대한 주문 금액
+        diff_quantity = diff_amount / current_price  # 주문 금액을 현재가로 나누면 주문 수량
+
+        # 비중이 지정한 비중보다 많으면 매도
+        # 비중이 지정한 비중보다 적으면 매수
+        if diff_weight > 0:
+            side = "sell"
+        else:
+            side = "buy"
+
+        transaction_in = schemas.TransactionCreate(
+            user_id=pf.user_id,
+            ticker_id=ticker.id,
+            side=side,
+            price=current_price,
+            quantity=diff_quantity,
+            order_type="market",
+        )
+        transaction = crud.transaction.create(db=db, obj_in=transaction_in)
+        print(transaction)
 
     return {"message": "success"}
