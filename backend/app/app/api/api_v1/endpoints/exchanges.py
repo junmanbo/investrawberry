@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=List[schemas.Exchange])
-def read_exchanges(
+async def read_exchanges(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
@@ -24,7 +24,7 @@ def read_exchanges(
 
 
 @router.post("", response_model=schemas.Exchange)
-def create_exchange(
+async def create_exchange(
     *,
     db: Session = Depends(deps.get_db),
     exchange_in: schemas.ExchangeCreate,
@@ -38,7 +38,7 @@ def create_exchange(
 
 
 @router.put("/{exchange_id}", response_model=schemas.Exchange)
-def update_exchange(
+async def update_exchange(
     *,
     db: Session = Depends(deps.get_db),
     exchange_id: int,
@@ -59,7 +59,7 @@ def update_exchange(
 
 
 @router.get("/{exchange_id}", response_model=schemas.Exchange)
-def read_exchange(
+async def read_exchange(
     exchange_id: int,
     current_user: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
@@ -74,4 +74,3 @@ def read_exchange(
             detail="The exchange with this id does not exist in the system",
         )
     return exchange
-

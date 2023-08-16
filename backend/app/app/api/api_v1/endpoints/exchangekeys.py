@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=List[schemas.ExchangeKey])
-def read_exchange_keys(
+async def read_exchange_keys(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -22,7 +22,7 @@ def read_exchange_keys(
 
 
 @router.post("", response_model=schemas.ExchangeKey)
-def create_exchange_key(
+async def create_exchange_key(
     *,
     db: Session = Depends(deps.get_db),
     exchange_nm: str = Body(None),
@@ -45,7 +45,7 @@ def create_exchange_key(
 
 
 @router.put("/{exchange_key_id}", response_model=schemas.ExchangeKey)
-def update_exchange_key(
+async def update_exchange_key(
     *,
     db: Session = Depends(deps.get_db),
     exchange_key_id: int,
@@ -70,7 +70,7 @@ def update_exchange_key(
 
 
 @router.delete("/{exchange_key_id}")
-def delete_exchange_key(
+async def delete_exchange_key(
     *,
     db: Session = Depends(deps.get_db),
     exchange_key_id: int,

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=schemas.Portfolio)
-def get_portfolio(
+async def get_portfolio(
     portfolio_id: int = Query(...),
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -23,7 +23,7 @@ def get_portfolio(
 
 
 @router.get("/all", response_model=List[schemas.Portfolio])
-def get_portfolios_by_user(
+async def get_portfolios_by_user(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -35,7 +35,7 @@ def get_portfolios_by_user(
 
 
 @router.post("", response_model=schemas.Portfolio)
-def create_portfolio(
+async def create_portfolio(
     pf_data: Dict,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -70,7 +70,7 @@ def create_portfolio(
 
 
 @router.put("", response_model=schemas.Portfolio)
-def update_portfolio(
+async def update_portfolio(
     pf_data: Dict,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -80,6 +80,8 @@ def update_portfolio(
     pf_data: 포트폴리오 구성 + 티커 데이터
     """
     portfolio = crud.portfolio.get(db=db, id=pf_data["id"])
+    if portfolio is None:
+        raise HTTPException(status_code=400, detail="Portfolio is not found.")
 
     # portfolio 기본 정보 업데이트
     portfolio_in = schemas.PortfolioUpdate(
