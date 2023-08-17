@@ -1,6 +1,5 @@
 from typing import Any
 import time
-from pprint import pprint
 
 from app.core.celery_app import celery_app
 from app import crud, schemas, models
@@ -79,6 +78,7 @@ def portfolio_order(pf_id: int) -> Any:
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
 
+    # portfolio 에 등록된 ticker 가져오기
     pf_tickers = crud.portfolio_ticker.get_by_portfolio_id(db=db, portfolio_id=pf.id)
     if not pf_tickers:
         raise Exception("Portfolio Tickers not found")
@@ -92,25 +92,40 @@ def portfolio_order(pf_id: int) -> Any:
             current_amount = total_balance[exchange.exchange_nm][ticker.symbol][
                 "notional"
             ]
-        except TypeError as e:
-            print(e)
+            # 현재가
+            current_price = total_balance[exchange.exchange_nm][ticker.symbol]["price"]
+        except KeyError as e:
+            print({"KeyError": f"{e} set 0 to current_amount value"})
             current_amount = 0
+            key = crud.exchange_key.get_key_by_owner_exchange(
+                db=db, owner_id=pf.user_id, exchange_id=exchange.id
+            )
+            if exchange.exchange_nm == "UPBIT":
+                client = upbit.Upbit(key.access_key, key.secret_key)
+            elif exchange.exchange_nm == "KIS":
+                client = kis.KIS(key.access_key, key.secret_key, key.account)
+            else:
+                raise Exception("Exchange not found")
+            current_price = client.get_price(symbol=ticker.symbol)
 
-        current_price = total_balance[exchange.exchange_nm][ticker.symbol][
-            "price"
-        ]  # 현재가
         current_weight = current_amount / pf.amount * 100  # 현재 비중
 
         diff_weight = current_weight - pf_ticker.weight  # 현재 비중과 포트폴리오 비중 차이 (%단위)
         diff_amount = abs(diff_weight) * pf.amount / 100  # 비중 차이에 대한 주문 금액
-        diff_quantity = diff_amount / current_price  # 주문 금액을 현재가로 나누면 주문 수량
+        try:
+            diff_quantity = diff_amount / current_price  # 주문 금액을 현재가로 나누면 주문 수량
+        except ZeroDivisionError as e:
+            print({"ZeroDivisionError": f"{e} set 0 to diff_quantity value"})
+            diff_quantity = 0
 
         # 비중이 지정한 비중보다 많으면 매도
         # 비중이 지정한 비중보다 적으면 매수
         if diff_weight > 0:
             side = "sell"
-        else:
+        elif diff_weight < 0:
             side = "buy"
+        else:
+            continue
 
         transaction_in = schemas.TransactionCreate(
             user_id=pf.user_id,
@@ -121,6 +136,6 @@ def portfolio_order(pf_id: int) -> Any:
             order_type="market",
         )
         transaction = crud.transaction.create(db=db, obj_in=transaction_in)
-        print(transaction)
+        celery_app.send_task("app.worker.place_order", args=[transaction.id])
 
-    return {"message": "success"}
+    return {"message": "Portfolio order success"}
