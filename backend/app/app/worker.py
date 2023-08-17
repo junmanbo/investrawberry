@@ -12,8 +12,8 @@ from app.trading import upbit, kis
 def place_order(transaction_id: int) -> Any:
     db = next((deps.get_db()))
     transaction = crud.transaction.get(db=db, id=transaction_id)
-    if transaction is None:
-        return {"message": "Transaction is not found."}
+    if not transaction:
+        raise Exception("Transaction not found")
     exchange = transaction.ticker.exchange
 
     # 키 정보 가져오기
@@ -26,7 +26,7 @@ def place_order(transaction_id: int) -> Any:
     elif exchange.exchange_nm == "KIS":
         client = kis.KIS(key.access_key, key.secret_key, key.account)
     else:
-        return {"message": "Exchange is not found."}
+        raise Exception("Exchange not found")
 
     order = client.place_order(transaction)
     # if order["rt_cd"] != "0":
@@ -58,8 +58,13 @@ def place_order(transaction_id: int) -> Any:
 
 
 @celery_app.task(acks_late=True)
-def portfolio_order(pf: models.Portfolio) -> Any:
+def portfolio_order(pf_id: int) -> Any:
     db = next((deps.get_db()))
+
+    # portfolio id 로 portfolio 조회
+    pf = crud.portfolio.get(db=db, id=pf_id)
+    if not pf:
+        raise Exception("Portfoilio not found")
 
     # 계좌 잔고 전체 가져오기
     exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=pf.user_id)
@@ -70,13 +75,13 @@ def portfolio_order(pf: models.Portfolio) -> Any:
         elif key.exchange.exchange_nm == "KIS":
             client = kis.KIS(key.access_key, key.secret_key, key.account)
         else:
-            return {"message": "Exchange is not found."}
+            raise Exception("Exchange not found")
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
 
     pf_tickers = crud.portfolio_ticker.get_by_portfolio_id(db=db, portfolio_id=pf.id)
-    if pf_tickers is None:
-        return {"message": "Portfolio Tickers are not found."}
+    if not pf_tickers:
+        raise Exception("Portfolio Tickers not found")
 
     # 총 금액으로 각 티커의 비중을 계산하고 필요한 만큼 매매
     for pf_ticker in pf_tickers:
