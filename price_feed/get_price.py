@@ -12,7 +12,7 @@ import re
 
 from typing import List
 
-print('CCXT Version:', ccxt.__version__)
+print("CCXT Version:", ccxt.__version__)
 
 
 class UpbitData:
@@ -26,14 +26,21 @@ class UpbitData:
         await gather(*[self.watch_ticker_loop(exchange, symbol) for symbol in symbols])
         await exchange.close()
 
-
     async def watch_ticker_loop(self, exchange, symbol):
         # exchange.verbose = True  # uncomment for debugging purposes if necessary
         while True:
             try:
                 ticker = await exchange.watch_ticker(symbol)
                 now = exchange.milliseconds()
-                print(exchange.iso8601(now), exchange.id, symbol, 'open:', ticker['open'], 'close:', ticker['close'])
+                print(
+                    exchange.iso8601(now),
+                    exchange.id,
+                    symbol,
+                    "open:",
+                    ticker["open"],
+                    "close:",
+                    ticker["close"],
+                )
                 await self.put_data_in_redis(symbol, json.dumps(ticker))
             except Exception as e:
                 print(str(e))
@@ -46,14 +53,22 @@ class UpbitData:
         self.redis_client.set(key, value)
 
     async def main(self):
-        exchanges = {'upbit': self.symbols}
-        loops = [self.exchange_loop(exchange_id, symbols) for exchange_id, symbols in exchanges.items()]
+        exchanges = {"upbit": self.symbols}
+        loops = [
+            self.exchange_loop(exchange_id, symbols)
+            for exchange_id, symbols in exchanges.items()
+        ]
         await gather(*loops)
 
     def get_symbols(self):
         exchange = ccxt.upbit({})
         markets = exchange.fetch_markets()
-        symbols = [market["symbol"] for market in markets if market["symbol"].split("/")[1] == "KRW"]
+        symbols = [
+            market["symbol"]
+            for market in markets
+            if market["symbol"].split("/")[1] == "KRW"
+        ]
+        print(symbols)
         return symbols
 
 
@@ -67,12 +82,18 @@ class KISData:
     def get_symbols(self) -> List:
         self.kis_client = mojito.KoreaInvestment(self.key, self.secret, self.account)
         markets = self.kis_client.fetch_symbols()
-        symbols = [row["단축코드"] for _, row in markets.iterrows() if re.match(r'^\d', row['단축코드'])]
+        symbols = [
+            row["단축코드"]
+            for _, row in markets.iterrows()
+            if re.match(r"^\d", row["단축코드"])
+        ]
         return symbols
 
     async def watch_data_loop(self, symbols):
         try:
-            broker_ws = mojito.KoreaInvestmentWS(self.key, self.secret, ["H0STCNT0"], symbols)
+            broker_ws = mojito.KoreaInvestmentWS(
+                self.key, self.secret, ["H0STCNT0"], symbols
+            )
             broker_ws.start()
             while True:
                 try:
@@ -80,7 +101,9 @@ class KISData:
                     data = data_[1]
                     symbol = data["유가증권단축종목코드"]
                     print(symbol, data["주식현재가"])
-                    await self.put_data_in_redis(symbol, json.dumps(data, ensure_ascii=False))
+                    await self.put_data_in_redis(
+                        symbol, json.dumps(data, ensure_ascii=False)
+                    )
                 except Exception as e:
                     print(f"Inner exception: {e}")
                     break

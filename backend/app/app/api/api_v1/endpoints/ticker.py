@@ -11,7 +11,7 @@ from app.trading import kis, upbit
 router = APIRouter()
 
 
-def add_current_price(db: Session, current_user, result, tickers):
+async def add_current_price(db: Session, current_user, result, tickers):
     for ticker in tickers:
         ticker_data = jsonable_encoder(ticker)
         if ticker.asset_type == "kr_stock":
@@ -43,7 +43,7 @@ async def search_ticker(
 
     tickers = crud.ticker.search_ticker_by_query(db=db, query=keyword)
     result = []
-    result = add_current_price(db, current_user, result, tickers)
+    result = await add_current_price(db, current_user, result, tickers)
     return result
 
 
@@ -58,5 +58,5 @@ async def search_ticker_top(
 
     tickers = crud.ticker.search_ticker_by_marketcap(db=db)
     result = []
-    result = add_current_price(db, current_user, result, tickers)
+    result = await add_current_price(db, current_user, result, tickers)
     return result

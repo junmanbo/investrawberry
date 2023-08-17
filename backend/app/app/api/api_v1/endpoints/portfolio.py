@@ -1,8 +1,9 @@
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
 
@@ -10,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("", response_model=schemas.Portfolio)
-def get_portfolio(
+async def get_portfolio(
     portfolio_id: int = Query(...),
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -19,11 +20,13 @@ def get_portfolio(
     저장한 포트폴리오 가져오기
     """
     portfolio = crud.portfolio.get(db=db, id=portfolio_id)
+    if not portfolio:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
     return portfolio
 
 
 @router.get("/all", response_model=List[schemas.Portfolio])
-def get_portfolios_by_user(
+async def get_portfolios_by_user(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -31,11 +34,13 @@ def get_portfolios_by_user(
     유저가 저장한 포트폴리오 전부 가져오기
     """
     portfolios = crud.portfolio.get_portfolio_by_user(db=db, user_id=current_user.id)
+    if not portfolios:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
     return portfolios
 
 
 @router.post("", response_model=schemas.Portfolio)
-def create_portfolio(
+async def create_portfolio(
     pf_data: Dict,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -65,12 +70,15 @@ def create_portfolio(
         crud.portfolio_ticker.create(db=db, obj_in=portfolio_ticker_in)
 
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
+    if not portfolio:
+        raise HTTPException(status_code=500, detail="Failed creating portfolio")
+    celery_app.send_task("app.worker.portfolio_order", args=[portfolio.id])
 
     return portfolio
 
 
 @router.put("", response_model=schemas.Portfolio)
-def update_portfolio(
+async def update_portfolio(
     pf_data: Dict,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
@@ -80,6 +88,8 @@ def update_portfolio(
     pf_data: 포트폴리오 구성 + 티커 데이터
     """
     portfolio = crud.portfolio.get(db=db, id=pf_data["id"])
+    if portfolio is None:
+        raise HTTPException(status_code=400, detail="Portfolio is not found.")
 
     # portfolio 기본 정보 업데이트
     portfolio_in = schemas.PortfolioUpdate(

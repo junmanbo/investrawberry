@@ -1,6 +1,5 @@
 from typing import Any
 import time
-from pprint import pprint
 
 from app.core.celery_app import celery_app
 from app import crud, schemas, models
@@ -12,8 +11,8 @@ from app.trading import upbit, kis
 def place_order(transaction_id: int) -> Any:
     db = next((deps.get_db()))
     transaction = crud.transaction.get(db=db, id=transaction_id)
-    if transaction is None:
-        return {"message": "Transaction is not found."}
+    if not transaction:
+        raise Exception("Transaction not found")
     exchange = transaction.ticker.exchange
 
     # 키 정보 가져오기
@@ -26,7 +25,7 @@ def place_order(transaction_id: int) -> Any:
     elif exchange.exchange_nm == "KIS":
         client = kis.KIS(key.access_key, key.secret_key, key.account)
     else:
-        return {"message": "Exchange is not found."}
+        raise Exception("Exchange not found")
 
     order = client.place_order(transaction)
     # if order["rt_cd"] != "0":
@@ -58,8 +57,13 @@ def place_order(transaction_id: int) -> Any:
 
 
 @celery_app.task(acks_late=True)
-def portfolio_order(pf: models.Portfolio) -> Any:
+def portfolio_order(pf_id: int) -> Any:
     db = next((deps.get_db()))
+
+    # portfolio id 로 portfolio 조회
+    pf = crud.portfolio.get(db=db, id=pf_id)
+    if not pf:
+        raise Exception("Portfoilio not found")
 
     # 계좌 잔고 전체 가져오기
     exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=pf.user_id)
@@ -70,30 +74,14 @@ def portfolio_order(pf: models.Portfolio) -> Any:
         elif key.exchange.exchange_nm == "KIS":
             client = kis.KIS(key.access_key, key.secret_key, key.account)
         else:
-            return {"message": "Exchange is not found."}
+            raise Exception("Exchange not found")
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
 
+    # portfolio 에 등록된 ticker 가져오기
     pf_tickers = crud.portfolio_ticker.get_by_portfolio_id(db=db, portfolio_id=pf.id)
-    if pf_tickers is None:
-        return {"message": "Portfolio Tickers are not found."}
-
-    # 포트폴리오에 있는 티커의 총 금액 구하기
-    total_amount = 0
-    for pf_ticker in pf_tickers:
-        exchange = pf_ticker.ticker.exchange
-        ticker = pf_ticker.ticker
-        try:
-            current_amount = total_balance[exchange.exchange_nm][ticker.symbol][
-                "notional"
-            ]
-        except TypeError as e:
-            print(e)
-            current_amount = 0
-
-        total_amount += current_amount
-
-    # total_amount = 0 or current_amount = 0 인 경우 (처음)
+    if not pf_tickers:
+        raise Exception("Portfolio Tickers not found")
 
     # 총 금액으로 각 티커의 비중을 계산하고 필요한 만큼 매매
     for pf_ticker in pf_tickers:
@@ -104,30 +92,50 @@ def portfolio_order(pf: models.Portfolio) -> Any:
             current_amount = total_balance[exchange.exchange_nm][ticker.symbol][
                 "notional"
             ]
-        except TypeError as e:
-            print(e)
+            # 현재가
+            current_price = total_balance[exchange.exchange_nm][ticker.symbol]["price"]
+        except KeyError as e:
+            print({"KeyError": f"{e} set 0 to current_amount value"})
             current_amount = 0
-
-        if current_amount == 0:
-            ticker_amount = int(pf.amount * pf_ticker.weight / 100)
-            ticker_quantity = ticker_amount / current_price
-            transaction_in = schemas.TransactionCreate(
-                user_id=pf.user_id,
-                ticker_id=ticker.id,
-                side="buy",
-                price=current_price,
-                quantity=ticker_quantity,
-                order_type="market",
+            key = crud.exchange_key.get_key_by_owner_exchange(
+                db=db, owner_id=pf.user_id, exchange_id=exchange.id
             )
-            crud.transaction.create(db=db, obj_in=transaction_in)
+            if exchange.exchange_nm == "UPBIT":
+                client = upbit.Upbit(key.access_key, key.secret_key)
+            elif exchange.exchange_nm == "KIS":
+                client = kis.KIS(key.access_key, key.secret_key, key.account)
+            else:
+                raise Exception("Exchange not found")
+            current_price = client.get_price(symbol=ticker.symbol)
+
+        current_weight = current_amount / pf.amount * 100  # 현재 비중
+
+        diff_weight = current_weight - pf_ticker.weight  # 현재 비중과 포트폴리오 비중 차이 (%단위)
+        diff_amount = abs(diff_weight) * pf.amount / 100  # 비중 차이에 대한 주문 금액
+        try:
+            diff_quantity = diff_amount / current_price  # 주문 금액을 현재가로 나누면 주문 수량
+        except ZeroDivisionError as e:
+            print({"ZeroDivisionError": f"{e} set 0 to diff_quantity value"})
+            diff_quantity = 0
+
+        # 비중이 지정한 비중보다 많으면 매도
+        # 비중이 지정한 비중보다 적으면 매수
+        if diff_weight > 0:
+            side = "sell"
+        elif diff_weight < 0:
+            side = "buy"
         else:
-            current_weight = current_amount / total_amount * 100
-            if current_weight > pf_ticker.weight:
-                trade_amount = (
-                    current_amount * (current_weight - pf_ticker.weight) / 100
-                )
-                trade_quantity = trade_amount / current_price
+            continue
 
-        print(ticker_amount)
+        transaction_in = schemas.TransactionCreate(
+            user_id=pf.user_id,
+            ticker_id=ticker.id,
+            side=side,
+            price=current_price,
+            quantity=diff_quantity,
+            order_type="market",
+        )
+        transaction = crud.transaction.create(db=db, obj_in=transaction_in)
+        celery_app.send_task("app.worker.place_order", args=[transaction.id])
 
-    return {"message": "success"}
+    return {"message": "Portfolio order success"}

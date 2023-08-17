@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, models
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("")
-def get_balance_all(
+async def get_balance_all(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -26,7 +26,7 @@ def get_balance_all(
         elif key.exchange.exchange_nm == "KIS":
             client = kis.KIS(key.access_key, key.secret_key, key.account)
         else:
-            return {"message": "Exchange is not found."}
+            raise HTTPException(status_code=400, detail="Exchange is not found.")
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
 
