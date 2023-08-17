@@ -36,7 +36,7 @@ async def simple_order(
     """
     order.user_id = current_user.id
     transaction = crud.transaction.create(db=db, obj_in=order)
-    await celery_app.send_task("app.worker.place_order", args=[transaction.id])
+    celery_app.send_task("app.worker.place_order", args=[transaction.id])
     return transaction
 
 

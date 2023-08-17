@@ -20,6 +20,8 @@ async def get_portfolio(
     저장한 포트폴리오 가져오기
     """
     portfolio = crud.portfolio.get(db=db, id=portfolio_id)
+    if not portfolio:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
     return portfolio
 
 
@@ -32,6 +34,8 @@ async def get_portfolios_by_user(
     유저가 저장한 포트폴리오 전부 가져오기
     """
     portfolios = crud.portfolio.get_portfolio_by_user(db=db, user_id=current_user.id)
+    if not portfolios:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
     return portfolios
 
 
@@ -66,7 +70,9 @@ async def create_portfolio(
         crud.portfolio_ticker.create(db=db, obj_in=portfolio_ticker_in)
 
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
-    await celery_app.send_task("app.worker.portfolio_order", args=[portfolio])
+    if not portfolio:
+        raise HTTPException(status_code=500, detail="Failed creating portfolio")
+    celery_app.send_task("app.worker.portfolio_order", args=[portfolio.id])
 
     return portfolio
 
