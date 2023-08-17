@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
 
@@ -65,6 +66,7 @@ async def create_portfolio(
         crud.portfolio_ticker.create(db=db, obj_in=portfolio_ticker_in)
 
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
+    await celery_app.send_task("app.worker.portfolio_order", args=[portfolio])
 
     return portfolio
 
