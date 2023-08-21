@@ -72,7 +72,6 @@ async def create_portfolio(
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
     if not portfolio:
         raise HTTPException(status_code=500, detail="Failed creating portfolio")
-    celery_app.send_task("app.worker.portfolio_order", args=[portfolio.id])
 
     return portfolio
 
