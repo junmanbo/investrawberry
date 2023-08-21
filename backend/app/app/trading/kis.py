@@ -13,11 +13,14 @@ class KIS:
 
     def get_total_balance(self) -> dict:
         balances = self.get_balance()
-        total_krw = int(balances.get("output2")[0].get("nass_amt"))
+        total_krw = int(balances.get("output2", [])[0].get("nass_amt"))
         balances = balances.get("output1")
 
         buying_krw = 0
         total_balance = {}
+
+        if not balances:
+            raise Exception("Account has problem")
 
         for balance in balances:
             price = int(float(balance.get("prpr")))
