@@ -5,7 +5,12 @@ import json
 
 
 class Upbit:
-    def __init__(self, access=None, secret=None):
+    def __init__(
+        self,
+        access: str | None = None,
+        secret: str | None = None,
+        account: str | None = None,
+    ):
         self.exchange = ccxt.upbit({"apiKey": access, "secret": secret})
         self.r = redis.Redis(host="localhost", port=6379, db=0)
 
