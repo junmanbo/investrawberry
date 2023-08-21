@@ -10,7 +10,7 @@ class KIS:
     def get_balance(self):
         balance = self.exchange.fetch_balance()
         return balance
-    
+
     def get_total_balance(self) -> dict:
         balances = self.get_balance()
         total_krw = int(balances.get("output2")[0].get("nass_amt"))
@@ -20,7 +20,7 @@ class KIS:
         total_balance = {}
 
         for balance in balances:
-            price  = int(float(balance.get("prpr")))
+            price = int(float(balance.get("prpr")))
             amount = int(float(balance.get("hldg_qty")))
             avg_price = int(float(balance.get("pchs_avg_pric")))
 
@@ -28,16 +28,16 @@ class KIS:
                 "price": price,
                 "amount": amount,
                 "avg_price": avg_price,
-                "notional": amount * avg_price
+                "notional": amount * avg_price,
             }
             buying_krw += price * amount
 
         krw = total_krw - buying_krw
         total_balance["KRW"] = {
-            "amount": krw, 
-            "price": 1, 
-            "avg_price": 1, 
-            "notional": krw
+            "amount": krw,
+            "price": 1,
+            "avg_price": 1,
+            "notional": krw,
         }
 
         return total_balance
@@ -45,7 +45,7 @@ class KIS:
     def get_market(self):
         markets = self.exchange.fetch_symbols()
         return markets
-        
+
     def place_order(self, params):
         side = params.side.lower()
 
@@ -58,11 +58,13 @@ class KIS:
 
         quantity = int(params.quantity)
         price = int(params.price)
-        order = self.exchange.create_order(side=side, 
-                                           symbol=params.ticker.symbol, 
-                                           price=price, 
-                                           quantity=quantity,
-                                           order_type=order_type)
+        order = self.exchange.create_order(
+            side=side,
+            symbol=params.ticker.symbol,
+            price=price,
+            quantity=quantity,
+            order_type=order_type,
+        )
         try:
             order["id"] = order["output"]["ODNO"]
         except KeyError:
@@ -84,9 +86,9 @@ class KIS:
         else:
             orders["status"] = "open"
 
-        orders["filled"] = int(orders["output2"]["tot_ccld_qty"]) # 체결 수량
-        orders["average"] = int(float(orders["output2"]["pchs_avg_pric"])) # 체결 금액
-        orders["fee"] = {"cost": int(orders["output2"]["prsm_tlex_smtl"])} # 수수료+세금
+        orders["filled"] = int(orders["output2"]["tot_ccld_qty"])  # 체결 수량
+        orders["average"] = int(float(orders["output2"]["pchs_avg_pric"]))  # 체결 금액
+        orders["fee"] = {"cost": int(orders["output2"]["prsm_tlex_smtl"])}  # 수수료+세금
 
         return orders
 
@@ -102,9 +104,9 @@ class KIS:
 
 if __name__ == "__main__":
     load_dotenv()
-    key = os.getenv("KIS_ACCESS")
-    secret = os.getenv("KIS_SECRET")
-    acc_no = os.getenv("KIS_ACCOUNT")
+    key = os.getenv("KIS_ACCESS", "")
+    secret = os.getenv("KIS_SECRET", "")
+    acc_no = os.getenv("KIS_ACCOUNT", "")
     kis = KIS(key, secret, acc_no)
     symbol = "005930"
     price = kis.get_price(symbol)

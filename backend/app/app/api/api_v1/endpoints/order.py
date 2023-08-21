@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
-from app import EXCHANGE_CLASSES
+from app import trading
 
 router = APIRouter()
 
@@ -59,10 +59,8 @@ async def cancel_order(
     )
 
     exchange_nm = key.exchange.exchange_nm
-    if exchange_nm in EXCHANGE_CLASSES:
-        client_class = EXCHANGE_CLASSES[exchange_nm]
-        client = client_class(key.access_key, key.secret_key, key.account)
-    else:
+    client = trading.get_client(exchange_nm=exchange_nm, key=key)
+    if not client:
         raise HTTPException(status_code=404, detail="Exchange is not found.")
 
     # 주문 취소

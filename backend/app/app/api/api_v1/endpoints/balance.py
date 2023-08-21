@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models
 from app.api import deps
-from app import EXCHANGE_CLASSES
+from app import trading
 
 router = APIRouter()
 
@@ -22,15 +22,10 @@ async def get_balance_all(
     total_balance = {}
     for key in exchange_keys:
         exchange_nm = key.exchange.exchange_nm
-        if exchange_nm in EXCHANGE_CLASSES:
-            client_class = EXCHANGE_CLASSES[exchange_nm]
-            client = client_class(key.access_key, key.secret_key, key.account)
-            balance = client.get_total_balance()
-            total_balance[exchange_nm] = balance
-        else:
+        client = trading.get_client(exchange_nm, key)
+        if not client:
             raise HTTPException(status_code=404, detail="Exchange is not found.")
-
         balance = client.get_total_balance()
-        total_balance[key.exchange.exchange_nm] = balance
+        total_balance[exchange_nm] = balance
 
     return total_balance

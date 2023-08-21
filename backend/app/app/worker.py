@@ -2,13 +2,13 @@ from typing import Any
 import time
 
 from app.core.celery_app import celery_app
-from app import crud, schemas, models
+from app import crud, schemas
 from app.api import deps
-from app.trading import upbit, kis
+from app import trading
 
 
 @celery_app.task(acks_late=True)
-def place_order(transaction_id: int) -> Any:
+async def place_order(transaction_id: int) -> Any:
     db = next((deps.get_db()))
     transaction = crud.transaction.get(db=db, id=transaction_id)
     if not transaction:
@@ -20,11 +20,8 @@ def place_order(transaction_id: int) -> Any:
         db, owner_id=transaction.user_id, exchange_id=exchange.id
     )
 
-    if exchange.exchange_nm == "UPBIT":
-        client = upbit.Upbit(key.access_key, key.secret_key)
-    elif exchange.exchange_nm == "KIS":
-        client = kis.KIS(key.access_key, key.secret_key, key.account)
-    else:
+    client = trading.get_client(exchange_nm=exchange.exchange_nm, key=key)
+    if not client:
         raise Exception("Exchange not found")
 
     order = client.place_order(transaction)
@@ -57,7 +54,7 @@ def place_order(transaction_id: int) -> Any:
 
 
 @celery_app.task(acks_late=True)
-def portfolio_order(pf_id: int) -> Any:
+async def portfolio_order(pf_id: int) -> Any:
     db = next((deps.get_db()))
 
     # portfolio id 로 portfolio 조회
@@ -69,11 +66,8 @@ def portfolio_order(pf_id: int) -> Any:
     exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=pf.user_id)
     total_balance = {}
     for key in exchange_keys:
-        if key.exchange.exchange_nm == "UPBIT":
-            client = upbit.Upbit(key.access_key, key.secret_key)
-        elif key.exchange.exchange_nm == "KIS":
-            client = kis.KIS(key.access_key, key.secret_key, key.account)
-        else:
+        client = trading.get_client(exchange_nm=key.exchange.exchange_nm, key=key)
+        if not client:
             raise Exception("Exchange not found")
         balance = client.get_total_balance()
         total_balance[key.exchange.exchange_nm] = balance
@@ -100,11 +94,8 @@ def portfolio_order(pf_id: int) -> Any:
             key = crud.exchange_key.get_key_by_owner_exchange(
                 db=db, owner_id=pf.user_id, exchange_id=exchange.id
             )
-            if exchange.exchange_nm == "UPBIT":
-                client = upbit.Upbit(key.access_key, key.secret_key)
-            elif exchange.exchange_nm == "KIS":
-                client = kis.KIS(key.access_key, key.secret_key, key.account)
-            else:
+            client = trading.get_client(exchange_nm=exchange.exchange_nm, key=key)
+            if not client:
                 raise Exception("Exchange not found")
             current_price = client.get_price(symbol=ticker.symbol)
 
@@ -136,6 +127,6 @@ def portfolio_order(pf_id: int) -> Any:
             order_type="market",
         )
         transaction = crud.transaction.create(db=db, obj_in=transaction_in)
-        celery_app.send_task("app.worker.place_order", args=[transaction.id])
+        await celery_app.send_task("app.worker.place_order", args=[transaction.id])
 
     return {"message": "Portfolio order success"}

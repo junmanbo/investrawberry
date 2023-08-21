@@ -5,12 +5,7 @@ import json
 
 
 class Upbit:
-    def __init__(
-        self,
-        access: str | None = None,
-        secret: str | None = None,
-        account: str | None = None,
-    ):
+    def __init__(self, access: str | None, secret: str | None, _: str | None):
         self.exchange = ccxt.upbit({"apiKey": access, "secret": secret})
         self.r = redis.Redis(host="localhost", port=6379, db=0)
 
@@ -84,5 +79,5 @@ class Upbit:
 
 
 if __name__ == "__main__":
-    upbit = Upbit()
+    upbit = Upbit(None, None, None)
     pprint(upbit.get_balance())
