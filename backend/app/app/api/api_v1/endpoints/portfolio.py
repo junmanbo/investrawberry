@@ -14,7 +14,7 @@ router = APIRouter()
 async def get_portfolio(
     portfolio_id: int = Query(...),
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     저장한 포트폴리오 가져오기
@@ -81,7 +81,7 @@ async def create_portfolio(
 async def update_portfolio(
     pf_data: Dict,
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     포트폴리오 구성 업데이트
