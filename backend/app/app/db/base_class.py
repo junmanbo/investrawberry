@@ -1,13 +1,16 @@
 from typing import Any
-from sqlalchemy.orm import as_declarative, declared_attr
+from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
+
+# 모델 class 를 snake case 를 이용하여 테이블명 생성
 def snake_case(s):
-    result = ''
+    result = ""
     for i, c in enumerate(s):
         if c.isupper() and i > 0:
-            result += '_'
+            result += "_"
         result += c.lower()
     return result
+
 
 @as_declarative()
 class Base:
@@ -18,5 +21,3 @@ class Base:
     @declared_attr
     def __tablename__(cls) -> str:
         return snake_case(cls.__name__)
-
-
