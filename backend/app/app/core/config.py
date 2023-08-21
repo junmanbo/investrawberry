@@ -49,8 +49,8 @@ class Settings(BaseSettings):
         )
 
     FIRST_SUPERUSER: EmailStr | str = os.getenv("FIRST_SUPERUSER", "admin")
-    FIRST_SUPERUSER_PASSWORD: str | None = os.getenv("FIRST_SUPERUSER_PASSWORD")
-    FIRST_NAME: str | None = os.getenv("FIRST_NAME")
+    FIRST_SUPERUSER_PASSWORD: str = os.getenv("FIRST_SUPERUSER_PASSWORD", "")
+    FIRST_NAME: str = os.getenv("FIRST_NAME", "")
     USERS_OPEN_REGISTRATION: bool = True
 
     class Config:
