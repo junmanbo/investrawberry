@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -14,7 +14,7 @@ async def read_exchanges(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve exchanges.
@@ -28,7 +28,7 @@ async def create_exchange(
     *,
     db: Session = Depends(deps.get_db),
     exchange_in: schemas.ExchangeCreate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Create new exchange.
@@ -39,11 +39,10 @@ async def create_exchange(
 
 @router.put("/{exchange_id}", response_model=schemas.Exchange)
 async def update_exchange(
-    *,
-    db: Session = Depends(deps.get_db),
     exchange_id: int,
     exchange_in: schemas.ExchangeUpdate,
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    _: models.User = Depends(deps.get_current_active_user),
+    db: Session = Depends(deps.get_db),
 ) -> Any:
     """
     Update an exchange.
@@ -61,7 +60,7 @@ async def update_exchange(
 @router.get("/{exchange_id}", response_model=schemas.Exchange)
 async def read_exchange(
     exchange_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    _: models.User = Depends(deps.get_current_active_user),
     db: Session = Depends(deps.get_db),
 ) -> Any:
     """

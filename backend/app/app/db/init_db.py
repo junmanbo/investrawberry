@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 
 from app import crud, schemas
 from app.core.config import settings
-from app.db import base
 
 # make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly
@@ -22,6 +21,6 @@ def init_db(db: Session) -> None:
             full_name=settings.FIRST_NAME,
             is_superuser=True,
             is_active=True,
-            is_vip=True
+            is_vip=True,
         )
         user = crud.user.create(db, obj_in=user_in)

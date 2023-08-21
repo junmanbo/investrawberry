@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
 from app import crud, models, schemas
 from app.api import deps
-from app.trading import upbit, kis
+from app import trading
 
 router = APIRouter()
 
@@ -58,12 +58,10 @@ async def cancel_order(
         db, owner_id=current_user.id, exchange_id=exchange.id
     )
 
-    if exchange.exchange_nm == "UPBIT":
-        client = upbit.Upbit(key.access_key, key.secret_key)
-    elif exchange.exchange_nm == "KIS":
-        client = kis.KIS(key.access_key, key.secret_key, key.account)
-    else:
-        raise HTTPException(status_code=400, detail="Exchange is not found.")
+    exchange_nm = key.exchange.exchange_nm
+    client = trading.get_client(exchange_nm=exchange_nm, key=key)
+    if not client:
+        raise HTTPException(status_code=404, detail="Exchange is not found.")
 
     # 주문 취소
     client.cancel_order(transaction.uuid)

@@ -1,3 +1,4 @@
+from typing import Any
 import ccxt
 from pprint import pprint
 import redis
@@ -5,11 +6,11 @@ import json
 
 
 class Upbit:
-    def __init__(self, access=None, secret=None):
+    def __init__(self, access: str | None, secret: str | None, _: str | None):
         self.exchange = ccxt.upbit({"apiKey": access, "secret": secret})
         self.r = redis.Redis(host="localhost", port=6379, db=0)
 
-    def get_balance(self):
+    def get_balance(self) -> Any:
         balance = self.exchange.fetch_balance()
         return balance
 
@@ -21,16 +22,17 @@ class Upbit:
             currency = balance.get("currency")
             avg_price = int(float(balance.get("avg_buy_price")))
             amount = float(balance.get("balance"))
-            notional = amount * avg_price
             price = self.get_price(symbol=currency)
             if currency == "KRW":
                 avg_price = 1
-            elif notional < 100:
+                price = 1
+            notional = amount * price
+            if notional < 10:
                 continue
             total_balance[currency] = {
                 "amount": amount,
                 "avg_price": avg_price,
-                "notional": amount * avg_price,
+                "notional": notional,
                 "price": price,
             }
 
@@ -79,5 +81,5 @@ class Upbit:
 
 
 if __name__ == "__main__":
-    upbit = Upbit()
+    upbit = Upbit(None, None, None)
     pprint(upbit.get_balance())

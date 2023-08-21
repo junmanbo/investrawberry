@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models
 from app.api import deps
-from app.trading import upbit, kis
+from app import trading
 
 router = APIRouter()
 
@@ -21,13 +21,11 @@ async def get_balance_all(
     exchange_keys = crud.exchange_key.get_multi_by_owner(db, owner_id=current_user.id)
     total_balance = {}
     for key in exchange_keys:
-        if key.exchange.exchange_nm == "UPBIT":
-            client = upbit.Upbit(key.access_key, key.secret_key)
-        elif key.exchange.exchange_nm == "KIS":
-            client = kis.KIS(key.access_key, key.secret_key, key.account)
-        else:
-            raise HTTPException(status_code=400, detail="Exchange is not found.")
+        exchange_nm = key.exchange.exchange_nm
+        client = trading.get_client(exchange_nm, key)
+        if not client:
+            raise HTTPException(status_code=404, detail="Exchange is not found.")
         balance = client.get_total_balance()
-        total_balance[key.exchange.exchange_nm] = balance
+        total_balance[exchange_nm] = balance
 
     return total_balance

@@ -1,12 +1,12 @@
 from typing import List, Dict, Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import crud, models
 from app.api import deps
-from app.trading import kis, upbit
+from app import trading
 
 router = APIRouter()
 
@@ -14,19 +14,18 @@ router = APIRouter()
 async def add_current_price(db: Session, current_user, result, tickers):
     for ticker in tickers:
         ticker_data = jsonable_encoder(ticker)
+        exchange_nm = ticker.exchange.exchange_nm
+
         if ticker.asset_type == "kr_stock":
-            exchange_key = crud.exchange_key.get_key_by_owner_exchange(
+            key = crud.exchange_key.get_key_by_owner_exchange(
                 db, owner_id=current_user.id, exchange_id=ticker.exchange_id
             )
-            client = kis.KIS(
-                exchange_key.access_key, exchange_key.secret_key, exchange_key.account
-            )
-            ticker_data["current_price"] = client.get_price(ticker.symbol)
-        elif ticker.asset_type == "crypto":
-            client = upbit.Upbit()
-            ticker_data["current_price"] = client.get_price(
-                ticker.symbol, ticker.currency
-            )
+        else:
+            key = None
+        client = trading.get_client(exchange_nm=exchange_nm, key=key)
+        if not client:
+            raise HTTPException(status_code=404, detail="Exchange not found")
+        ticker_data["current_price"] = client.get_price(ticker.symbol)
         result.append(ticker_data)
     return result
 
