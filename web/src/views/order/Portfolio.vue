@@ -20,23 +20,31 @@
     </div>
     <div class="form-group">
       <label for="investment-amount">투자 금액(단위 원):</label>
-      <input id="investment-amount" type="number" class="form-control" min="1" step="1" oninput="validity.valid||(value='')" />
+      <input v-model="investmentAmount" id="investment-amount" type="number" class="form-control" min="1" step="1" oninput="validity.valid||(value='')" />
     </div>
     <div class="form-group">
       <label for="rebalancing-period">리밸런싱 주기(단위 일):</label>
-      <input id="rebalancing-period" type="number" class="form-control" min="1" step="1" oninput="validity.valid||(value='')" />
+      <input v-model="rebalancingPeriod" id="rebalancing-period" type="number" class="form-control" min="1" step="1" oninput="validity.valid||(value='')" />
     </div>
     <!-- 메모 추가 -->
     <div class="form-group">
       <label for="memo">메모:</label>
-      <textarea id="memo" class="form-control" rows="3"></textarea>
+      <textarea v-model="memo" id="memo" class="form-control" rows="3"></textarea>
     </div>
     <div class="form-group">
-      <button class="btn btn-success mr-2">생성</button>
+      <button @click="createAndShowModal" class="btn btn-success mr-2">생성</button>
       <button class="btn btn-success mr-2">수정</button>
       <button class="btn btn-danger mr-3">삭제</button>
       <button class="btn btn-primary">실행</button>
     </div>
+    <!-- 생성 결과를 보여주는 모달 -->
+    <Modal
+      v-if="isModalVisible.value"
+      :title="modalTitle.value"
+      :body="modalBody.value"
+      :modalId="'resultModal'"
+      @close-modal="isModalVisible.value = false"
+    />
   </div>
 </template>
 
@@ -45,6 +53,8 @@ import { OrderMenu } from '@/views/order';
 import { SearchModal } from '@/views/order';
 import { PortfolioModal } from '@/views/order';
 import { ref, reactive } from 'vue';
+import { usePortfolioStore } from '@/stores';
+import { Modal } from '@/components'
 
 // 선택 메뉴 값 가져오기
 const selectedMenu = ref('PORTFOLIO');
@@ -77,7 +87,55 @@ const removeTicker = (index) => {
   selectedTickers.value.splice(index, 1);
 };
 
+// portfolio.store.js 함수 사용
+const portfolioStore = usePortfolioStore();
 
+const investmentAmount = ref(0);
+const rebalancingPeriod = ref(7);
+const memo = ref("");
+
+const createPortfolio = async () => {
+  const portfolioTicker = selectedTickers.value.map(ticker => ({ ticker_id: ticker.id, weight: ticker.weight }));
+  
+  const payload = {
+    rebal_period: rebalancingPeriod.value,
+    amount: investmentAmount.value,
+    memo: memo.value,
+    portfolio_ticker: portfolioTicker
+  };
+  
+  try {
+    const createdPortfolio = await portfolioStore.createPortfolio(payload);
+    return createdPortfolio;
+  } catch (error) {
+    console.error("Error creating portfolio:", error);
+    return null;
+  }
+};
+
+// 모달 표시 여부를 관리하는 상태
+const isModalVisible = ref(false);
+
+// 모달에 표시할 내용을 저장하는 상태
+const modalTitle = ref('');
+const modalBody = ref('');
+
+// 포트폴리오 모달에서 선택된 내용을 저장하는 상태
+const selectedPortfolioInfo = ref(null);
+
+// createAndShowModal 함수를 만듦
+const createAndShowModal = async () => {
+  // createPortfolio 함수를 실행하여 생성 결과를 받아옴
+  const createdPortfolio = await createPortfolio();
+
+  // 생성 결과를 모달에 표시하기 위해 정보 저장
+  if (createdPortfolio) {
+    selectedPortfolioInfo.value = createdPortfolio;
+    modalTitle.value = '포트폴리오 생성 결과';
+    modalBody.value = JSON.stringify(createdPortfolio, null, 2);
+    isModalVisible.value = true;
+  }
+};
 </script>
 
 <style scoped>

@@ -26,7 +26,17 @@ export const usePortfolioStore = defineStore({
       } catch (error) {
         console.error('Error getting all portfolios:', error);
       }
-    }
+    },
+    async createPortfolio(payload) {
+      try {
+        const response = await fetchWrapper.post(baseUrl, payload);
+        // 서버에서 생성된 포트폴리오 정보를 반환합니다.
+        return response;
+      } catch (error) {
+        console.error('Error creating portfolio:', error);
+        return null; // 오류 발생 시 null 반환
+      }
+    },
   }
 });
 
