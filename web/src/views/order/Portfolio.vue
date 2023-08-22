@@ -9,7 +9,10 @@
     <!-- 종목 정보 표시 -->
     <div class="ticker-row" v-for="(ticker, index) in selectedTickers" :key="ticker.id">
       <div class="ticker-info">
-        {{ ticker.ticker_knm }} - {{ ticker.symbol }}
+        {{ ticker.ticker_knm }}
+      </div>
+      <div class="ticker-weight">
+        <input v-model="ticker.weight" type="number" class="form-control ticker-weight-input" placeholder="Weight" step="0.01" />
       </div>
       <button @click.stop="removeTicker(index)" class="btn btn-outline-danger btn-sm remove-button">
         <i class="fas fa-trash-alt"></i> <!-- 삭제 아이콘 -->
@@ -47,22 +50,29 @@ import { ref, reactive } from 'vue';
 const selectedMenu = ref('PORTFOLIO');
 
 // ticker 값 가져오기
-//const selectedTickers = reactive([]);
 const selectedTickers = ref([]);
+
 // portfolio 값 가져오기
 const selectedPortfolio = ref(null);
 
 // 선택한 portfolio 와 선택한 ticker 를 누적하여 표시
 const portfolioSelected = (portfolio) => {
   const newTickers = portfolio.portfolio_ticker.map(
-    (portfolioTicker) => portfolioTicker.ticker
+    (portfolioTicker) => ({
+      ...portfolioTicker.ticker,
+      weight: 0.0  // 초기 비중값을 0.0으로 설정
+    })
   );
   selectedTickers.value.push(...newTickers);
 };
 
 const tickerSelected = (ticker) => {
-  selectedTickers.value.push(ticker);
+  selectedTickers.value.push({
+    ...ticker,
+    weight: 0.0  // 초기 비중값을 0.0으로 설정
+  });
 };
+
 const removeTicker = (index) => {
   selectedTickers.value.splice(index, 1);
 };
@@ -78,16 +88,30 @@ const removeTicker = (index) => {
   margin-bottom: 10px;
   background-color: #f0f0f0; /* 배경색 추가 */
   padding: 10px; /* 패딩 추가 */
-  border-radius: 5px; /* 둥글게 처리 */
+  border-radius: 4px; /* 둥글게 처리 */
+  border: 1px solid #ccc;
 }
 
 .ticker-info {
   flex: 1;
-  font-family: 'Noto Sans KR', sans-serif; /* 폰트 변경 */
-  font-weight: 700; /* 볼드체 설정 */
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 700;
+  font-size: 16px; /* 폰트 사이즈 추가 */
+  border-right: 1px solid #ccc; /* 오른쪽 테두리 추가 */
+  padding-right: 10px; /* 오른쪽 여백 추가 */
+  margin-right: 10px; /* 오른쪽 마진 추가 */
 }
+
 
 .remove-button {
   margin-left: 10px;
+}
+
+.ticker-weight {
+  margin-top: 5px;
+}
+
+.ticker-weight-input {
+  width: 75px;
 }
 </style>
