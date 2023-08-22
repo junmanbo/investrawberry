@@ -71,7 +71,7 @@ async def create_portfolio(
 
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
     if not portfolio:
-        raise HTTPException(status_code=500, detail="Failed creating portfolio")
+        raise HTTPException(status_code=400, detail="Failed creating portfolio")
 
     return portfolio
 
@@ -88,7 +88,7 @@ async def update_portfolio(
     """
     portfolio = crud.portfolio.get(db=db, id=pf_data["id"])
     if portfolio is None:
-        raise HTTPException(status_code=400, detail="Portfolio is not found.")
+        raise HTTPException(status_code=404, detail="Portfolio is not found.")
 
     # portfolio 기본 정보 업데이트
     portfolio_in = schemas.PortfolioUpdate(
