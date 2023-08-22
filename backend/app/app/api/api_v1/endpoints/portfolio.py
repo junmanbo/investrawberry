@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.core.celery_app import celery_app
 from app import crud, models, schemas
@@ -74,6 +75,32 @@ async def create_portfolio(
         raise HTTPException(status_code=400, detail="Failed creating portfolio")
 
     return portfolio
+
+
+@router.put("/run", response_model=schemas.Portfolio)
+async def run_portfolio(
+    is_running: bool,
+    pf_id: int,
+    db: Session = Depends(deps.get_db),
+    _: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    포트폴리오 실행/중지
+    is_running: True-실행 False-중지
+    pf_id: 포트폴리오 ID
+    """
+    pf = crud.portfolio.get(db=db, id=pf_id)
+    if not pf:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+
+    rebal_dt = datetime.now().date()
+    pf_in = schemas.PortfolioUpdate(is_running=is_running, rebal_dt=rebal_dt)
+    pf = crud.portfolio.update(db=db, db_obj=pf, obj_in=pf_in)
+
+    if is_running is True:
+        celery_app.send_task("app.worker.portfolio_order", args=[pf.id])
+
+    return pf
 
 
 @router.put("", response_model=schemas.Portfolio)
