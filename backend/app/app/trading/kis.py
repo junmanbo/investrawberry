@@ -27,11 +27,19 @@ class KIS:
             amount = int(float(balance.get("hldg_qty")))
             avg_price = int(float(balance.get("pchs_avg_pric")))
 
+            # 수익률, 수익금 계산
+            notional = amount * price
+            avg_notional = avg_price * amount
+            return_rate = (price - avg_price) / avg_price * 100
+            return_profit = notional - avg_notional
+
             total_balance[balance.get("prdt_name")] = {
                 "price": price,
                 "amount": amount,
                 "avg_price": avg_price,
-                "notional": amount * avg_price,
+                "notional": notional,
+                "return_rate": return_rate,
+                "return_profit": return_profit,
             }
             buying_krw += price * amount
 

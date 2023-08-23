@@ -26,14 +26,22 @@ class Upbit:
             if currency == "KRW":
                 avg_price = 1
                 price = 1
+
             notional = amount * price
+            # 자산 평가금액이 10원 미만이면 리스트에서 제외
             if notional < 10:
                 continue
+            avg_notional = avg_price * amount
+
+            return_rate = (price - avg_price) / avg_price * 100
+            return_profit = notional - avg_notional
             total_balance[currency] = {
                 "amount": amount,
                 "avg_price": avg_price,
                 "notional": notional,
                 "price": price,
+                "return_rate": return_rate,
+                "return_profit": return_profit,
             }
 
         return total_balance
