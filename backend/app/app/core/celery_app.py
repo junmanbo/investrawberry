@@ -4,7 +4,7 @@ import os
 
 
 RABBITMQ_DEFAULT_USER = os.getenv("RABBITMQ_DEFAULT_USER", "guest")
-RABBITMQ_DEFAULT_PASS = os.getenv("RABBITMQ_DEFAULT_PASSW", "guest")
+RABBITMQ_DEFAULT_PASS = os.getenv("RABBITMQ_DEFAULT_PASS", "guest")
 RABBITMQ_HOSTNAME = os.getenv("RABBITMQ_HOSTNAME", "localhost")
 
 REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
