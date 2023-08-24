@@ -18,5 +18,8 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY ./app /app
 
+ENV C_FORCE_ROOT=1
+
 ENV PYTHONPATH=/app
+
 CMD ["celery", "-A", "app.worker", "worker", "-l", "info"]
