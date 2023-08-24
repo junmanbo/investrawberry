@@ -1,0 +1,59 @@
+version: "3.3"
+services:
+  db:
+    image: postgres:15
+    container_name: db
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+  queue:
+    image: rabbitmq:3-management
+    container_name: queue
+    env_file:
+      - .env
+    ports:
+      - 15672:15672
+    hostname: queue
+
+  redis:
+    image: redis:7
+    container_name: redis
+    env_file:
+      - .env
+  
+  backend:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    container_name: backend
+    depends_on:
+      - db
+    env_file:
+      - .env
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+    ports:
+      - 8080:8080
+
+  celeryworker:
+    image: '${DOCKER_IMAGE_CELERY?Variable not set}:${TAG-latest}'
+    container_name: celeryworker
+    depends_on:
+      - db
+      - queue
+      - redis
+    env_file:
+      - .env
+    build:
+      context: ./backend
+      dockerfile: celery.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+  
+volumes:
+  app-db-data:

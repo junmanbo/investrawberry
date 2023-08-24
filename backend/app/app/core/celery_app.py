@@ -1,10 +1,20 @@
 from celery.result import AsyncResult
 from celery import Celery
+import os
 
-# celery_app = Celery("worker", broker="amqp://guest@queue//")
-celery_app = Celery(
-    "worker", broker="amqp://guest@localhost:5672//", backend="redis://localhost:6379/0"
+
+RABBITMQ_DEFAULT_USER = os.getenv("RABBITMQ_DEFAULT_USER", "guest")
+RABBITMQ_DEFAULT_PASS = os.getenv("RABBITMQ_DEFAULT_PASSW", "guest")
+RABBITMQ_HOSTNAME = os.getenv("RABBITMQ_HOSTNAME", "localhost")
+
+REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
+
+broker_url = (
+    f"amqp://{RABBITMQ_DEFAULT_USER}:{RABBITMQ_DEFAULT_PASS}@{RABBITMQ_HOSTNAME}:5672//"
 )
+backend_url = f"redis://{REDIS_HOSTNAME}:6379/0"
+
+celery_app = Celery("worker", broker=broker_url, backend=backend_url)
 celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.task_routes = {
     "app.worker.place_order": "order",
