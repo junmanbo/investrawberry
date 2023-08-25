@@ -13,7 +13,7 @@ from app.trading.kis import KIS
 db = next(deps.get_db())
 
 # upbit 티커 정보 넣기
-upbit = Upbit()
+upbit = Upbit(None, None, None)
 markets = upbit.get_market()
 
 # Get the exchange ID for UPBIT
