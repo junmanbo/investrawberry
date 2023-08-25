@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] | List = [
         "http://localhost:3000",
         "http://localhost",
-        "http://localhost:80",
+        "http://frontend",
     ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
