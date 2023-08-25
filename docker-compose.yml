@@ -76,7 +76,7 @@ services:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_FRONTEND}:latest'
     container_name: frontend
     env_file:
-      - ./frontend/env
+      - ./frontend/.env
     build:
       context: ./frontend
       dockerfile: Dockerfile
