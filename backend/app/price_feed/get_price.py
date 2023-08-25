@@ -31,15 +31,6 @@ class UpbitData:
             try:
                 ticker = await exchange.watch_ticker(symbol)
                 now = exchange.milliseconds()
-                print(
-                    exchange.iso8601(now),
-                    exchange.id,
-                    symbol,
-                    "open:",
-                    ticker["open"],
-                    "close:",
-                    ticker["close"],
-                )
                 await self.put_data_in_redis(symbol, json.dumps(ticker))
             except Exception as e:
                 print(str(e))
@@ -67,7 +58,6 @@ class UpbitData:
             for market in markets
             if market["symbol"].split("/")[1] == "KRW"
         ]
-        print(symbols)
         return symbols
 
 
@@ -99,7 +89,6 @@ class KISData:
                     data_ = broker_ws.get()
                     data = data_[1]
                     symbol = data["유가증권단축종목코드"]
-                    print(symbol, data["주식현재가"])
                     await self.put_data_in_redis(
                         symbol, json.dumps(data, ensure_ascii=False)
                     )
