@@ -38,7 +38,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - 8000:8000
     command: 'uvicorn app.main:app --host 0.0.0.0 --port 8000'
 
   celery-worker:
@@ -71,6 +71,15 @@ services:
     env_file:
       - .env
     command: 'python3 price_feed/get_price.py'
+
+  frontend:
+    image: '${DOCKER_USER}/${DOCKER_IMAGE_FRONTEND}:latest'
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
   
 volumes:
   app-db-data:
