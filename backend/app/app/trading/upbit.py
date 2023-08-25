@@ -3,12 +3,15 @@ import ccxt
 from pprint import pprint
 import redis
 import json
+import os
+
+REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
 
 
 class Upbit:
     def __init__(self, access: str | None, secret: str | None, _: str | None):
         self.exchange = ccxt.upbit({"apiKey": access, "secret": secret})
-        self.r = redis.Redis(host="localhost", port=6379, db=0)
+        self.r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=0)
 
     def get_balance(self) -> Any:
         balance = self.exchange.fetch_balance()

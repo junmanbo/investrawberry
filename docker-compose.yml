@@ -39,9 +39,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080:8080
-    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8080'
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8000'
 
-  celeryworker:
+  celery-worker:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest'
     container_name: celery-worker
     depends_on:
@@ -56,12 +56,21 @@ services:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest'
     container_name: flower
     depends_on:
-      - celeryworker
+      - celery-worker
     env_file:
       - .env
     command: 'celery -A app.worker flower --broker=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@queue:5672//'
     ports:
       - 5555:5555
+
+  price-feed:
+    image: '${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest'
+    container_name: price-feed
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    command: 'python3 price_feed/get_price.py'
   
 volumes:
   app-db-data:

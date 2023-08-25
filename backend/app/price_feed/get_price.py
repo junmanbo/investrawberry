@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from asyncio import run, gather
 import ccxt.pro
 import ccxt
@@ -7,18 +5,19 @@ import redis
 import json
 import mojito
 import os
-from dotenv import load_dotenv
 import re
 
 from typing import List
 
 print("CCXT Version:", ccxt.__version__)
 
+REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
+
 
 class UpbitData:
     def __init__(self) -> None:
         self.symbols = self.get_symbols()
-        self.redis_client = redis.Redis(host="localhost", port=6379, db=0)
+        self.redis_client = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=0)
 
     async def exchange_loop(self, exchange_id, symbols):
         exchange = getattr(ccxt.pro, exchange_id)()
