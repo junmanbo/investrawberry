@@ -38,7 +38,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - 127.0.0.1:8000:8000
+      - 8000:8000
     command: 'uvicorn app.main:app --host 127.0.0.1 --port 8000'
 
   celery-worker:
@@ -75,6 +75,8 @@ services:
   frontend:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_FRONTEND}:latest'
     container_name: frontend
+    env_file:
+      - .env
     build:
       context: ./frontend
       dockerfile: Dockerfile
