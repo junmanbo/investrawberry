@@ -13,19 +13,16 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.email == email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        db_obj = UserInDB(
+        db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
             full_name=obj_in.full_name,
             is_superuser=obj_in.is_superuser,
-            is_active=obj_in.is_active,
-            is_vip=obj_in.is_vip,
         )
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-        user = db.query(User).filter_by(email=db_obj.email).first()
-        return user
+        return db_obj
 
     def update(
         self, db: Session, *, db_obj: User, obj_in: UserUpdate | Dict[str, Any]
