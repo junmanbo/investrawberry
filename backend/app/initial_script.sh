@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create table
-mkdir app/alembic/versions
+mkdir alembic/versions
 alembic upgrade head
 alembic revision --autogenerate
 alembic upgrade head
