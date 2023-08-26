@@ -101,7 +101,7 @@ services:
       dockerfile: "Dockerfile"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`tutong.${DOMAIN}`)"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
 volumes:
