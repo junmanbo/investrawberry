@@ -1,5 +1,44 @@
 version: '3.3'
 services:
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    networks:
+      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+      - default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - --providers.docker.exposedbydefault=false
+      # Enable the access log, with HTTP requests
+      - --accesslog
+      # Enable the Traefik log, for configurations and errors
+      - --log
+      # Enable the Dashboard and API
+      - --api
+    labels:
+      # Enable Traefik for this service, to make it available in the public network
+      - traefik.enable=true
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+      # traefik-http set up only to use the middleware to redirect to https
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      - traefik.http.routers.proxy-http.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.proxy-http.entrypoints=http
+      - traefik.http.routers.proxy-https.rule=Host(`${DOMAIN?Variable not set}`) || Host(`www.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.proxy-https.entrypoints=https
+      - traefik.http.routers.proxy-https.tls=true
+      - traefik.http.routers.proxy-https.tls.certresolver=le
+      - traefik.http.services.proxy.loadbalancer.server.port=80
+      - traefik.http.middlewares.www-redirect.redirectregex.regex=^https?://(www.)?(${DOMAIN?Variable not set})/(.*)
+      - traefik.http.middlewares.www-redirect.redirectregex.replacement=https://${DOMAIN?Variable not set}/$${3}
+      - traefik.http.routers.proxy-https.middlewares=www-redirect
+      - traefik.http.routers.proxy-http.middlewares=www-redirect,https-redirect
+
   db:
     image: postgres:15
     container_name: db
@@ -9,16 +48,12 @@ services:
       - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
 
   queue:
-    image: rabbitmq:3-management
+    image: rabbitmq:3
     container_name: queue
     env_file:
       - .env
-    ports:
-      - 15672:15672
     hostname: queue
 
   redis:
@@ -37,9 +72,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 80'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`)
+      - traefik.http.services.backend.loadbalancer.server.port=80
 
   celery-worker:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest'
@@ -60,8 +97,17 @@ services:
     env_file:
       - .env
     command: 'celery -A app.worker flower --broker=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@queue:5672//'
-    ports:
-      - 5555:5555
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+      - traefik.http.routers.flower-http.rule=Host(`flower.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.flower-http.entrypoints=http
+      - traefik.http.routers.flower-http.middlewares=https-redirect
+      - traefik.http.routers.flower-https.rule=Host(`flower.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.flower-https.entrypoints=https
+      - traefik.http.routers.flower-https.tls=true
+      - traefik.http.routers.flower-https.tls.certresolver=le
+      - traefik.http.services.flower.loadbalancer.server.port=5555
 
   price-feed:
     image: '${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest'
@@ -79,9 +125,15 @@ services:
       - ./frontend/.env
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - 80:80
-  
+      dockerfile: Dockerfile  
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend-http.rule=PathPrefix(`/`)
+      - traefik.http.services.frontend.loadbalancer.server.port=80
 volumes:
   app-db-data:
+
+networks:
+  traefik-public:
+    # Allow setting it to false for testing
+    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
