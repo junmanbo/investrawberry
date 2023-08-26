@@ -42,6 +42,7 @@ async def search_ticker(
 
     tickers = crud.ticker.search_ticker_by_query(db=db, query=keyword)
     result = []
+    current_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
     result = await add_current_price(db, current_user, result, tickers)
     return result
 
@@ -57,5 +58,6 @@ async def search_ticker_top(
 
     tickers = crud.ticker.search_ticker_by_marketcap(db=db)
     result = []
+    current_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
     result = await add_current_price(db, current_user, result, tickers)
     return result
