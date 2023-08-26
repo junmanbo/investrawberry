@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] | List = [
         "http://localhost:3000",
         "http://localhost",
-        "http://frontend",
+        "http://duckdns.org",
+        "http://backend.duckdns.org",
     ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
