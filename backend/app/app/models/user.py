@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Index
 
 from app.db.base_class import Base
 
@@ -12,6 +12,12 @@ class User(Base):
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
     is_vip = Column(Boolean(), default=False)
+    refresh_token = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Index 설정
+    __table_args__ = (
+        Index("idx_email", email),
+        Index("idx_refresh_token", refresh_token),
+    )
