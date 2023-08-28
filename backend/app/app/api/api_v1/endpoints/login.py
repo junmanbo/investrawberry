@@ -17,7 +17,6 @@ router = APIRouter()
 async def login_access_token(
     db: Session = Depends(deps.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
-    response: Response = Depends(),
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -34,6 +33,7 @@ async def login_access_token(
         user.id, expires_delta=access_token_expires
     )
     # JWT 토큰을 쿠키로 설정하여 응답 헤더에 추가한다.
+    response = Response()
     response.set_cookie(
         key="access_token",
         value=access_token,
