@@ -15,6 +15,3 @@ class User(Base):
     refresh_token = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Index 설정
-    __table_args__ = (Index("idx_refresh_token", refresh_token),)
