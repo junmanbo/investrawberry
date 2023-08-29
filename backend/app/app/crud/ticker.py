@@ -33,7 +33,7 @@ class CRUDTicker(CRUDBase[Ticker, TickerCreate, TickerUpdate]):
 
         return results
 
-    def get_ticker_by_symbol(self, db: Session, symbol: str) -> Ticker:
+    def get_ticker_by_symbol(self, db: Session, symbol: str) -> Ticker | None:
         return db.query(Ticker).filter_by(symbol=symbol).first()
 
 

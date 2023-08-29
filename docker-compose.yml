@@ -24,6 +24,8 @@ services:
       - ".env"
     environment:
       - "PGDATA=/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
 
   queue:
     image: "rabbitmq:3"

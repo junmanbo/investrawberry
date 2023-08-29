@@ -34,7 +34,7 @@ async def add_current_price(db: Session, current_user, result, tickers):
 async def search_ticker(
     keyword: str = Query(...),
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> List[Dict[str, Any]]:
     """
     검색한 티커 목록 조회
@@ -42,15 +42,17 @@ async def search_ticker(
 
     tickers = crud.ticker.search_ticker_by_query(db=db, query=keyword)
     result = []
-    current_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
-    result = await add_current_price(db, current_user, result, tickers)
+    temp_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
+    if not temp_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = await add_current_price(db, temp_user, result, tickers)
     return result
 
 
 @router.get("/top")
 async def search_ticker_top(
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
+    _: models.User = Depends(deps.get_current_active_user),
 ) -> List[Dict[str, Any]]:
     """
     시가총액 TOP3 종목
@@ -58,6 +60,8 @@ async def search_ticker_top(
 
     tickers = crud.ticker.search_ticker_by_marketcap(db=db)
     result = []
-    current_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
-    result = await add_current_price(db, current_user, result, tickers)
+    temp_user = crud.user.get_by_email(db=db, email="chchdelm3@icloud.com")
+    if not temp_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = await add_current_price(db, temp_user, result, tickers)
     return result
