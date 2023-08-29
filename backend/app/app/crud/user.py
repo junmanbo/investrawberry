@@ -9,7 +9,7 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+    def get_by_email(self, db: Session, *, email: str) -> User | None:
         return db.query(User).filter_by(email=email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
