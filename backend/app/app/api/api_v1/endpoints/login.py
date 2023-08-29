@@ -67,7 +67,7 @@ async def login_access_token(
     return response
 
 
-@router.get("/login/refresh-token", response_model=schemas.Token)
+@router.post("/login/refresh-token", response_model=schemas.Token)
 async def login_refresh_token(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -87,3 +87,16 @@ async def login_refresh_token(
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@router.post("/logout")
+async def logout(
+    revoked_token: bool = Depends(deps.revoke_token),
+) -> dict[str, str]:
+    """
+    Logout - token blacklisting
+    """
+    if revoked_token is True:
+        return {"message": "success logout"}
+    else:
+        return {"message": "failed logout"}

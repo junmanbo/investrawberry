@@ -1,4 +1,8 @@
 from typing import Generator
+from datetime import datetime, timezone
+import json
+import redis
+import os
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -14,6 +18,8 @@ from app.db.session import SessionLocal
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
+
+REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
 
 
 def get_db() -> Generator:
@@ -72,3 +78,40 @@ def get_current_active_superuser(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+def revoke_token(
+    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+) -> bool:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        token_data = schemas.TokenPayload(**payload)
+    except exceptions.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Token has expired",
+        )
+    except (exceptions.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+
+    user = crud.user.get(db, id=token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    now = datetime.now(timezone.utc)
+    exp_datetime = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+    remaining_time = int((exp_datetime - now).total_seconds())
+    print(remaining_time)
+
+    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
+    r.set(user.id, json.dumps(token))
+    r.expire(user.id, remaining_time)
+
+    user_in = schemas.UserUpdate(refresh_token=None, password=None)
+    crud.user.update(db=db, db_obj=user, obj_in=user_in)
+    return True
