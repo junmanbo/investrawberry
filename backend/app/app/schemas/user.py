@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, EmailStr
 
 
@@ -21,11 +19,12 @@ class UserCreate(UserBase):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    password: Optional[str] = None
+    password: str | None = None
+    refresh_token: str | None = None
 
 
 class UserInDBBase(UserBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
