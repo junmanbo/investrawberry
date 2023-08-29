@@ -50,15 +50,28 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
+    # check user
     user = crud.user.get(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # check refresh token
     if token_data.usage == "refresh" and token != user.refresh_token:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
 
+    # check blacklist
+    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
+    black_token = r.get(user.id)
+    if black_token:
+        black_token = json.loads(black_token)
+    if black_token == token:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Token in blacklist",
+        )
     return user
 
 
@@ -106,7 +119,6 @@ def revoke_token(
     now = datetime.now(timezone.utc)
     exp_datetime = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
     remaining_time = int((exp_datetime - now).total_seconds())
-    print(remaining_time)
 
     r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
     r.set(user.id, json.dumps(token))
