@@ -67,7 +67,9 @@ async def cancel_order(
     client.cancel_order(transaction.uuid)
 
     # 취소된 매매내역 상태 업데이트
-    transaction_in = schemas.TransactionUpdate(uuid=transaction.uuid, status="cancel")
+    transaction_in = schemas.TransactionUpdate(
+        uuid=str(transaction.uuid), status="cancel"
+    )
     transaction = crud.transaction.update(
         db=db, db_obj=transaction, obj_in=transaction_in
     )
