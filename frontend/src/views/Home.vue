@@ -1,7 +1,7 @@
 <template>
     <div v-if="user">
         <div class="jumbotron text-center">
-            <h1 class="display-8 fs-4">{{user.user_name}}님, 안녕하세요!</h1>
+            <h1 class="display-8 fs-4">{{user.token_type}}님, 안녕하세요!</h1>
             <p class="lead fs-6">오늘도 투자 성공하세요 :)</p>
         </div>
         <div class="container">

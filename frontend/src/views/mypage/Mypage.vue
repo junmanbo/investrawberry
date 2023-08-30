@@ -1,6 +1,6 @@
 <template>
   <div class="text-right mt-3">
-    <h5>{{ user.user_name }}님</h5>
+    <h5>{{ user.token_type }}님</h5>
     <button class="btn btn-secondary" @click="logout">로그아웃</button>
   </div>
   <div class="container">
