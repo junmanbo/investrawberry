@@ -1,16 +1,22 @@
+/* base.css */
+
 .app-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start; /* 모바일 뷰에서 컨텐츠 상단에 정렬 */
+    align-items: stretch; /* 너비를 화면에 맞게 늘림 */
 }
 
 .container {
     flex: 1;
+    padding: 1rem; /* 컨텐츠 주위에 여백 추가 */
 }
 
 .btn-delete-user {
     width: 40px;
     text-align: center;
     box-sizing: content-box;
+    padding: 5px 0; /* 버튼 내용 중앙 정렬 및 상하 여백 추가 */
 }
 
