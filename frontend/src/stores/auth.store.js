@@ -1,51 +1,3 @@
-// import { defineStore } from 'pinia';
-//
-// import { fetchWrapper } from '@/helpers';
-// import { router } from '@/router';
-// import { useAlertStore } from '@/stores';
-//
-// const baseUrl = `${import.meta.env.VITE_API_URL}`;
-//
-// export const useAuthStore = defineStore({
-//     id: 'auth',
-//     state: () => ({
-//         // initialize state from local storage to enable user to stay logged in
-//         user: JSON.parse(localStorage.getItem('user')),
-//         returnUrl: null
-//     }),
-//     actions: {
-//         async login(username, password) {
-//             try {
-//                 const user = await fetchWrapper.post(`${baseUrl}/login/access-token`, { username, password });    
-//
-//                 // update pinia state
-//                 this.user = user;
-//
-//                 // store user details and jwt in local storage to keep user logged in between page refreshes
-//                 localStorage.setItem('user', JSON.stringify(user));
-//
-//                 // redirect to previous url or default to home page
-//                 router.push(this.returnUrl || '/');
-//             } catch (error) {
-//                 const alertStore = useAlertStore();
-//                 alertStore.error(error);                
-//             }
-//         },
-//         async logout() {
-//             try {
-//                 await fetchWrapper.post(`${baseUrl}/logout`); // Send logout request
-//
-//                 this.user = null;
-//                 localStorage.removeItem('user');
-//                 router.push('/account/login');
-//             } catch (error) {
-//                 const alertStore = useAlertStore();
-//                 alertStore.error(error);
-//             }
-//         }
-//     }
-// });
-//
 import { defineStore } from 'pinia';
 
 import { fetchWrapper } from '@/helpers';
@@ -57,21 +9,13 @@ const baseUrl = `${import.meta.env.VITE_API_URL}`;
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-        // initialize state from local storage to enable user to stay logged in
-        user: JSON.parse(localStorage.getItem('user')),
+        user: null,
         returnUrl: null
     }),
     actions: {
         async login(username, password) {
             try {
-                const user = await fetchWrapper.post(`${baseUrl}/login/access-token`, { username, password });    
-
-                // update pinia state
-                this.user = user;
-
-                // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(user));
-
+                this.user = await fetchWrapper.post(`${baseUrl}/login/access-token`, { username, password });    
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
             } catch (error) {
@@ -79,11 +23,18 @@ export const useAuthStore = defineStore({
                 alertStore.error(error);                
             }
         },
+        async refreshAccessToken() {
+            try {
+                this.user = await fetchWrapper.post(`${baseUrl}/login/refresh-token`);
+            } catch (error) {
+                const alertStore = useAlertStore();
+                alertStore.error(error);
+            }
+        },
         logout() {
             try {
-                const user = fetchWrapper.post(`${baseUrl}/logout`);    
+                fetchWrapper.post(`${baseUrl}/logout`);    
                 this.user = null;
-                localStorage.removeItem('user');
                 router.push('/account/login');
             } catch (error) {
                 const alertStore = useAlertStore();
