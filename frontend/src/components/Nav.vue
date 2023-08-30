@@ -14,7 +14,7 @@ const authStore = useAuthStore();
                 <i class="fas fa-wallet"></i>
             </router-link>
             <router-link to="/order" class="tab-menu-item">
-                <i class="fas fa-shopping-cart"></i>
+                <i class="fas fa-chart-line"></i>
             </router-link>
             <router-link to="/mypage" class="tab-menu-item">
                 <i class="fas fa-user"></i>
