@@ -4,7 +4,7 @@ import json
 import redis
 import os
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, exceptions
 from pydantic import ValidationError
@@ -37,7 +37,7 @@ def get_current_user(
 ) -> models.User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.ACCESS_SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = schemas.TokenPayload(**payload)
     except exceptions.ExpiredSignatureError:
@@ -54,13 +54,6 @@ def get_current_user(
     user = crud.user.get(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # check refresh token
-    if token_data.usage == "refresh" and token != user.refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-        )
 
     # check blacklist
     r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
@@ -98,7 +91,7 @@ def revoke_token(
 ) -> bool:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.ACCESS_SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = schemas.TokenPayload(**payload)
     except exceptions.ExpiredSignatureError:
@@ -127,3 +120,34 @@ def revoke_token(
     user_in = schemas.UserUpdate(refresh_token=None, password=None)
     crud.user.update(db=db, db_obj=user, obj_in=user_in)
     return True
+
+
+def check_refresh(
+    db: Session = Depends(get_db), token: str = Cookie(reusable_oauth2)
+) -> models.User:
+    try:
+        payload = jwt.decode(
+            token, settings.REFRESH_SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        token_data = schemas.TokenPayload(**payload)
+    except exceptions.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Token has expired",
+        )
+    except (exceptions.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    # check user
+    user = crud.user.get(db, id=token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if token != user.refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+
+    return user
