@@ -30,26 +30,23 @@ async def login_access_token(
     elif not crud.user.is_active(user):
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    # 만료 시간 설정
+    # access token 생성
     now = datetime.now(timezone.utc)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_expire = now + access_token_expires
-    access_token = security.create_token(user.id, expire=access_expire, usage="access")
+    access_token = security.create_access_token(user.id, expire=access_expire)
 
+    # refresh token 생성
     refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
     refresh_expire = now + refresh_token_expires
-    refresh_token = security.create_token(
-        user.id, expire=refresh_expire, usage="refresh"
-    )
+    refresh_token = security.create_refresh_token(user.id, expire=refresh_expire)
     user_in = schemas.UserUpdate(refresh_token=refresh_token, password=None)
     user = crud.user.update(db=db, db_obj=user, obj_in=user_in)
 
     response = JSONResponse(
         content={
             "access_token": access_token,
-            "refresh_token": refresh_token,
             "token_type": "bearer",
-            "user_name": user.full_name,
         }
     )
 
@@ -58,10 +55,10 @@ async def login_access_token(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True,
+        secure=False,
         max_age=int(refresh_token_expires.total_seconds()),
         expires=refresh_expire,
-        path="/auth",
+        path="/login/refresh-token",
     )
 
     return response
@@ -69,19 +66,17 @@ async def login_access_token(
 
 @router.post("/login/refresh-token", response_model=schemas.Token)
 async def login_refresh_token(
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.check_refresh),
 ) -> Any:
     """
     Refresh access token using the provided refresh token
     """
 
     # Generate a new access token
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_expire = now + access_token_expires
-    access_token = security.create_token(
-        current_user.id, expire=access_expire, usage="access"
-    )
+    access_token = security.create_access_token(current_user.id, expire=access_expire)
 
     return {
         "access_token": access_token,
