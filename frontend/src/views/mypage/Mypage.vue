@@ -47,8 +47,12 @@ import { useAuthStore } from '@/stores';
 
 const authStore = useAuthStore();
 const user = authStore.user;
-const logout = () => {
-  // 여기에 로그아웃을 처리하는 코드를 추가하세요.
+const logout = async () => {
+  try {
+    await authStore.logout();
+  } catch (error) {
+    console.log(error);
+  }
 };
 </script>
 
