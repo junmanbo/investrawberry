@@ -3,8 +3,8 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.response import JSONResponse
 from sqlalchemy.orm import Session
-from starlette.responses import JSONResponse
 
 from app import crud, schemas
 from app.api import deps
@@ -55,7 +55,7 @@ async def login_access_token(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,
+        secure=True,
         max_age=int(refresh_token_expires.total_seconds()),
         expires=refresh_expire,
         path="/",
