@@ -4,7 +4,7 @@ import json
 import redis
 import os
 
-from fastapi import Depends, HTTPException, status, Cookie
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, exceptions
 from pydantic import ValidationError
