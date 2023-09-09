@@ -15,16 +15,6 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  db:
-    image: "postgres:15"
-    container_name: "db"
-    volumes:
-      - "app-db-data:/var/lib/postgresql/data/pgdata"
-    env_file:
-      - ".env"
-    environment:
-      - "PGDATA=/var/lib/postgresql/data/pgdata"
-
   queue:
     image: "rabbitmq:3"
     container_name: "queue"
@@ -41,8 +31,6 @@ services:
   backend:
     image: "${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest"
     container_name: "backend"
-    depends_on:
-      - "db"
     env_file:
       - ".env"
     build:
@@ -51,7 +39,7 @@ services:
     command: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`backend.${DOMAIN}`)"
+      - "traefik.http.routers.backend.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
@@ -59,7 +47,6 @@ services:
     image: "${DOCKER_USER}/${DOCKER_IMAGE_BACKEND}:latest"
     container_name: "celery-worker"
     depends_on:
-      - "db"
       - "queue"
       - "redis"
     env_file:
