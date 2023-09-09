@@ -8,7 +8,6 @@ class UserBase(BaseModel):
     is_active: bool | None = True
     is_superuser: bool | None = False
     is_vip: bool | None = False
-    refresh_token: str | None = None
 
 
 # Properties to receive via API on creation
@@ -20,7 +19,6 @@ class UserCreate(UserBase):
 # Properties to receive via API on update
 class UserUpdate(UserBase):
     password: str | None = None
-    refresh_token: str | None = None
 
 
 class UserInDBBase(UserBase):

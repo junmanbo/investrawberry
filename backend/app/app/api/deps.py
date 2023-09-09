@@ -42,12 +42,12 @@ def get_current_user(
         token_data = schemas.TokenPayload(**payload)
     except exceptions.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
     except (exceptions.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
     # check user
@@ -62,7 +62,7 @@ def get_current_user(
         black_token = json.loads(black_token)
     if black_token == token:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token in blacklist",
         )
     return user
@@ -96,12 +96,12 @@ def revoke_token(
         token_data = schemas.TokenPayload(**payload)
     except exceptions.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
     except (exceptions.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
 
@@ -117,13 +117,11 @@ def revoke_token(
     r.set(user.id, json.dumps(token))
     r.expire(user.id, remaining_time)
 
-    user_in = schemas.UserUpdate(refresh_token=None, password=None)
-    crud.user.update(db=db, db_obj=user, obj_in=user_in)
     return True
 
 
 def check_refresh(
-    db: Session = Depends(get_db), token: str = Cookie(reusable_oauth2)
+    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> models.User:
     try:
         payload = jwt.decode(
@@ -132,12 +130,12 @@ def check_refresh(
         token_data = schemas.TokenPayload(**payload)
     except exceptions.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
     except (exceptions.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
     # check user
@@ -146,7 +144,7 @@ def check_refresh(
         raise HTTPException(status_code=404, detail="User not found")
     if token != user.refresh_token:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
 
