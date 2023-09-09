@@ -4,7 +4,7 @@ import os
 
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.response import JSONResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
