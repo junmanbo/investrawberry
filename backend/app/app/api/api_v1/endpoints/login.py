@@ -85,11 +85,11 @@ async def login_refresh_token(refresh_token: str = Cookie()) -> Any:
 @router.post("/logout")
 async def logout(
     revoked_token: bool = Depends(deps.revoke_token),
-) -> dict[str, str]:
+) -> Any:
     """
     Logout - token blacklisting
     """
-    if revoked_token is True:
-        return {"message": "success logout"}
-    else:
-        return {"message": "failed logout"}
+    content = {"message": "success logout"}
+    response = JSONResponse(content=content)
+    response.delete_cookie(key="refresh_token", path="/")
+    return response
