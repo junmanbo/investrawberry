@@ -4,26 +4,18 @@ import { fetchWrapper } from '@/helpers';
 import { router } from '@/router';
 import { useAlertStore } from '@/stores';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/login`;
+const baseUrl = `${import.meta.env.VITE_API_URL}`;
 
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-        // initialize state from local storage to enable user to stay logged in
-        user: JSON.parse(localStorage.getItem('user')),
+        user: null,
         returnUrl: null
     }),
     actions: {
         async login(username, password) {
             try {
-                const user = await fetchWrapper.post(`${baseUrl}/access-token`, { username, password });    
-
-                // update pinia state
-                this.user = user;
-
-                // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(user));
-
+                this.user = await fetchWrapper.post(`${baseUrl}/login/access-token`, { username, password });    
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
             } catch (error) {
@@ -31,10 +23,23 @@ export const useAuthStore = defineStore({
                 alertStore.error(error);                
             }
         },
+        async refreshAccessToken() {
+            try {
+                this.user = await fetchWrapper.post(`${baseUrl}/login/refresh-token`);
+            } catch (error) {
+                const alertStore = useAlertStore();
+                alertStore.error(error);
+            }
+        },
         logout() {
-            this.user = null;
-            localStorage.removeItem('user');
-            router.push('/account/login');
+            try {
+                fetchWrapper.post(`${baseUrl}/logout`);    
+                this.user = null;
+                router.push('/account/login');
+            } catch (error) {
+                const alertStore = useAlertStore();
+                alertStore.error(error);                
+            }
         }
     }
 });

@@ -51,9 +51,8 @@ async def cancel_order(
     """
     transaction = crud.transaction.get(db=db, id=transaction_id)
     if transaction is None:
-        raise HTTPException(status_code=400, detail="Transaction is not found.")
+        raise HTTPException(status_code=404, detail="Transaction not found.")
     exchange = transaction.ticker.exchange
-
     key = crud.exchange_key.get_key_by_owner_exchange(
         db, owner_id=current_user.id, exchange_id=exchange.id
     )
@@ -61,13 +60,14 @@ async def cancel_order(
     exchange_nm = key.exchange.exchange_nm
     client = trading.get_client(exchange_nm=exchange_nm, key=key)
     if not client:
-        raise HTTPException(status_code=404, detail="Exchange is not found.")
-
+        raise HTTPException(status_code=404, detail="Client not found.")
     # 주문 취소
     client.cancel_order(transaction.uuid)
 
     # 취소된 매매내역 상태 업데이트
-    transaction_in = schemas.TransactionUpdate(uuid=transaction.uuid, status="cancel")
+    transaction_in = schemas.TransactionUpdate(
+        uuid=str(transaction.uuid), status="cancel"
+    )
     transaction = crud.transaction.update(
         db=db, db_obj=transaction, obj_in=transaction_in
     )
