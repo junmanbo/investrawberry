@@ -49,11 +49,14 @@ async function handleResponse(response) {
         const user = JSON.parse(sessionStorage.getItem('user'));
         const { logout, refreshAccessToken } = useAuthStore();
         if ([401, 403].includes(response.status) && user) {
-            try {
-                refreshAccessToken();
-            } catch (error) {
-                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+            if (response.url.endsWith('refresh-token')) {
                 logout();
+            } else {
+                try {
+                    refreshAccessToken();
+                } catch (error) {
+                    logout();
+                }
             }
         }
 
