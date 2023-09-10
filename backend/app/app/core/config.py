@@ -17,9 +17,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     SERVER_NAME: str | None = os.getenv("SERVER_NAME", "")
     SERVER_HOST: str | AnyHttpUrl = os.getenv("SERVER_HOST", "http://localhost:8000")
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] | List = [
+    BACKEND_CORS_ORIGINS: List = [
         "http://localhost:3000",
-        "http://localhost",
         "http://tutong.kr",
         "https://tutong.kr",
     ]
@@ -33,10 +32,11 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "MyApp")
-    POSTGRES_SERVER: str | None = os.getenv("POSTGRES_SERVER")
-    POSTGRES_USER: str | None = os.getenv("POSTGRES_USER")
-    POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD")
-    POSTGRES_DB: str | None = os.getenv("POSTGRES_DB")
+    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "test")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "test123")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "db")
+    POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -48,6 +48,7 @@ class Settings(BaseSettings):
             username=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
+            port=values.get("POSTGRES_PORT"),
             path=values.get("POSTGRES_DB") or "",
         )
 
