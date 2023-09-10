@@ -67,6 +67,8 @@ async def login_refresh_token(refresh_token: str = Cookie(default=None)) -> Any:
     """
     Refresh access token using the provided refresh token
     """
+    if refresh_token is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     user = deps.check_refresh(token=refresh_token)
     # Generate a new access token
     now = datetime.now(timezone.utc)
