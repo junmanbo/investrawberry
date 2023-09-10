@@ -12,7 +12,6 @@ function request(method) {
         const requestOptions = {
             method,
             headers: authHeader(url),
-            url,
             credentials: 'include' // withCredentials to true
         };
         if (body) {
@@ -31,8 +30,7 @@ function request(method) {
 // helper functions
 
 function authHeader(url) {
-    // return auth header with jwt if user is logged in and request is to the api url
-    const { user } = useAuthStore();
+    const user = JSON.parse(sessionStorage.getItem('user'));
     const isLoggedIn = !!user?.access_token;
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
     if (isLoggedIn && isApiUrl) {
@@ -42,19 +40,19 @@ function authHeader(url) {
     }
 }
 
-async function handleResponse(response, requestOptions, retry = true) {
+async function handleResponse(response) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
 
     // check for error response
     if (!response.ok) {
+        const user = JSON.parse(sessionStorage.getItem('user'));
         const { logout, refreshAccessToken } = useAuthStore();
-        if ([401].includes(response.status) && retry) {
+        if ([401, 403].includes(response.status) && user) {
             try {
-                await refreshAccessToken();
-                return fetch(requestOptions.url, requestOptions).then(response => handleResponse(response, requestOptions, false));
+                refreshAccessToken();
             } catch (error) {
-                // auto logout if refreshing access token fails
+                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 logout();
             }
         }
