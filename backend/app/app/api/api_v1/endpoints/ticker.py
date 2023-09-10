@@ -1,20 +1,20 @@
-from typing import List, Dict, Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app import crud, models
+from app import crud, models, schemas
 from app.api import deps
 
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", response_model=List[schemas.Ticker])
 async def search_ticker(
     keyword: str = Query(...),
     db: Session = Depends(deps.get_db),
     _: models.User = Depends(deps.get_current_active_user),
-) -> List[Dict[str, Any]]:
+) -> Any:
     """
     검색한 티커 목록 조회
     """
@@ -23,11 +23,11 @@ async def search_ticker(
     return tickers
 
 
-@router.get("/top")
+@router.get("/top", response_model=List[schemas.Ticker])
 async def search_ticker_top(
     db: Session = Depends(deps.get_db),
     _: models.User = Depends(deps.get_current_active_user),
-) -> List[Dict[str, Any]]:
+) -> Any:
     """
     시가총액 TOP3 종목
     """

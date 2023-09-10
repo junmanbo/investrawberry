@@ -1,5 +1,5 @@
 from typing import Generator
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 import json
 import redis
 import os
@@ -57,10 +57,8 @@ def get_current_user(
 
     # check blacklist
     r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
-    black_token = r.get(user.id)
+    black_token = r.get(token)
     if black_token:
-        black_token = json.loads(black_token)
-    if black_token == token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token in blacklist",
@@ -86,40 +84,6 @@ def get_current_active_superuser(
     return current_user
 
 
-def revoke_token(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
-) -> bool:
-    try:
-        payload = jwt.decode(
-            token, settings.ACCESS_SECRET_KEY, algorithms=[security.ALGORITHM]
-        )
-        token_data = schemas.TokenPayload(**payload)
-    except exceptions.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-        )
-    except (exceptions.JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-        )
-
-    user = crud.user.get(db, id=token_data.sub)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    now = datetime.now(timezone.utc)
-    exp_datetime = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
-    remaining_time = int((exp_datetime - now).total_seconds())
-
-    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
-    r.set(user.id, json.dumps(token))
-    r.expire(user.id, remaining_time)
-
-    return True
-
-
 def check_refresh(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> models.User:
@@ -139,13 +103,7 @@ def check_refresh(
             detail="Could not validate credentials",
         )
     # check user
-    user = crud.user.get(db, id=token_data.sub)
+    user = crud.user.get(db=db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if token != user.refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-        )
-
     return user

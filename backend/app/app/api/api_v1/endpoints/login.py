@@ -1,5 +1,8 @@
 from datetime import timedelta, datetime, timezone
 from typing import Any
+import redis
+import os
+import json
 
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
@@ -41,7 +44,11 @@ async def login_access_token(
     refresh_expire = now + refresh_token_expires
     refresh_token = security.create_refresh_token(user.id, expire=refresh_expire)
 
-    content = {"access_token": access_token, "token_type": "Bearer"}
+    content = {
+        "access_token": access_token,
+        "token_type": "Bearer",
+        "user_name": user.full_name,
+    }
     response = JSONResponse(content=content)
 
     # Set HttpOnly and Secure options for the refresh token cookie
@@ -77,13 +84,21 @@ async def login_refresh_token(refresh_token: str = Cookie()) -> Any:
 
 
 @router.post("/logout")
-async def logout(
-    revoked_token: bool = Depends(deps.revoke_token),
-) -> Any:
+async def logout(token: str | None = None) -> Any:
     """
     Logout - token blacklisting
     """
     content = {"message": "success logout"}
     response = JSONResponse(content=content)
     response.delete_cookie(key="refresh_token", path="/")
+
+    if token is None:
+        return response
+
+    REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
+    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
+    expire_time = datetime.utcnow() + timedelta(minutes=30)
+    r.set(json.dumps(token), expire_time.strftime("%Y%m%d %H:%M:%S"))
+    r.expire(token, 30 * 60)
+
     return response
