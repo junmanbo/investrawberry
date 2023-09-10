@@ -1,17 +1,16 @@
 from pydantic import BaseModel
-from typing import Optional
 
 from app import schemas
 
 
 # Shared properties
 class ExchangeKeyBase(BaseModel):
-    exchange_id: Optional[int] = None
-    user_id: Optional[int] = None
-    access_key: Optional[str] = None
-    secret_key: Optional[str] = None
-    account: Optional[str] = None
-    is_valid: Optional[bool] = True
+    exchange_id: int | None = None
+    user_id: int | None = None
+    access_key: str | None = None
+    secret_key: str | None = None
+    account: str | None = None
+    is_valid: bool | None = True
 
 
 # Properties to receive via API on creation
@@ -27,14 +26,16 @@ class ExchangeKeyUpdate(ExchangeKeyBase):
 
 
 class ExchangeKeyInDBBase(ExchangeKeyBase):
-    id: Optional[int] = None
+    id: int | None = None
 
     class Config:
         from_attributes = True
 
 
 # Additional properties to return via API
-class ExchangeKey(ExchangeKeyInDBBase):
+class ExchangeKey(BaseModel):
+    id: int
+    is_valid: bool
     exchange: schemas.Exchange
 
 
