@@ -20,7 +20,7 @@ class KIS:
         total_balance = {}
 
         if not balances:
-            raise Exception("Account has problem")
+            return total_balance
 
         for balance in balances:
             price = int(float(balance.get("prpr")))
