@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime, timezone
 from typing import Any
-import os
 
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
@@ -41,16 +40,9 @@ async def login_access_token(
     refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
     refresh_expire = now + refresh_token_expires
     refresh_token = security.create_refresh_token(user.id, expire=refresh_expire)
-    user_in = schemas.UserUpdate(password=None)
-    user = crud.user.update(db=db, db_obj=user, obj_in=user_in)
 
-    domain = os.getenv("DOMAIN", "localhost")
-    headers = {
-        "Access-Control-Allow-Origin": f"https://{domain}",
-        "Content-Language": "en-US",
-    }
     content = {"access_token": access_token, "token_type": "Bearer"}
-    response = JSONResponse(content=content, headers=headers)
+    response = JSONResponse(content=content)
 
     # Set HttpOnly and Secure options for the refresh token cookie
     response.set_cookie(
