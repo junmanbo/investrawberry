@@ -24,8 +24,8 @@
             </thead>
             <tbody>
                 <tr v-for="(ticker, index) in domesticStockTopTickers" :key="index">
-                    <td>{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
-                    <td>{{ticker.marketcap.toLocaleString()}} 억원</td>
+                    <td style="width: 50%;">{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
+                    <td style="width: 50%;">{{ticker.marketcap.toLocaleString()}} 억원</td>
                 </tr>
             </tbody>
         </table>
@@ -37,8 +37,8 @@
             </thead>
             <tbody>
                 <tr v-for="(ticker, index) in coinTopTickers" :key="index">
-                    <td>{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
-                    <td>{{ticker.marketcap.toLocaleString()}} 억원</td>
+                    <td style="width: 50%;">{{ticker.ticker_knm}}<br><small>{{ticker.symbol}}</small></td>
+                    <td style="width: 50%;">{{ticker.marketcap.toLocaleString()}} 억원</td>
                 </tr>
             </tbody>
         </table>
@@ -91,7 +91,5 @@ const hideMenu = () => {
 };
 </script>
 
-<style>
-@import '@/assets/home.css';
-</style> 
+<style scoped src="@/assets/home.css"></style> 
 
