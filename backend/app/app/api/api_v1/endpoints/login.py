@@ -1,8 +1,5 @@
 from datetime import timedelta, datetime, timezone
 from typing import Any
-import redis
-import os
-import json
 
 from fastapi import APIRouter, Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
@@ -17,7 +14,7 @@ from app.core.config import settings
 router = APIRouter()
 
 
-@router.post("/login/access-token", response_model=schemas.Token)
+@router.post("/login/access-token")
 async def login_access_token(
     db: Session = Depends(deps.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -56,7 +53,7 @@ async def login_access_token(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True,
+        secure=False,
         max_age=int(refresh_token_expires.total_seconds()),
         expires=refresh_expire,
         path="/",
@@ -65,8 +62,8 @@ async def login_access_token(
     return response
 
 
-@router.post("/login/refresh-token", response_model=schemas.Token)
-async def login_refresh_token(refresh_token: str = Cookie()) -> Any:
+@router.post("/login/refresh-token")
+async def login_refresh_token(refresh_token: str = Cookie(default=None)) -> Any:
     """
     Refresh access token using the provided refresh token
     """
@@ -80,25 +77,16 @@ async def login_refresh_token(refresh_token: str = Cookie()) -> Any:
     return {
         "access_token": access_token,
         "token_type": "Bearer",
+        "user_name": user.full_name,
     }
 
 
 @router.post("/logout")
-async def logout(token: str | None = None) -> Any:
+async def logout() -> Any:
     """
     Logout - token blacklisting
     """
     content = {"message": "success logout"}
     response = JSONResponse(content=content)
     response.delete_cookie(key="refresh_token", path="/")
-
-    if token is None:
-        return response
-
-    REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
-    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
-    expire_time = datetime.utcnow() + timedelta(minutes=30)
-    r.set(json.dumps(token), expire_time.strftime("%Y%m%d %H:%M:%S"))
-    r.expire(token, 30 * 60)
-
     return response

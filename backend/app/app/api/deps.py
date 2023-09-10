@@ -1,8 +1,4 @@
 from typing import Generator
-from datetime import datetime, timedelta
-import json
-import redis
-import os
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -18,8 +14,6 @@ from app.db.session import SessionLocal
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
-
-REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
 
 
 def get_db() -> Generator:
@@ -55,14 +49,6 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # check blacklist
-    r = redis.Redis(host=REDIS_HOSTNAME, port=6379, db=1)
-    black_token = r.get(token)
-    if black_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token in blacklist",
-        )
     return user
 
 
@@ -84,9 +70,8 @@ def get_current_active_superuser(
     return current_user
 
 
-def check_refresh(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
-) -> models.User:
+def check_refresh(token: str = Depends(reusable_oauth2)) -> models.User:
+    db = next(get_db())
     try:
         payload = jwt.decode(
             token, settings.REFRESH_SECRET_KEY, algorithms=[security.ALGORITHM]
