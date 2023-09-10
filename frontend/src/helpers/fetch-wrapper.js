@@ -11,7 +11,9 @@ function request(method) {
     return (url, body) => {
         const requestOptions = {
             method,
-            headers: authHeader(url)
+            headers: authHeader(url),
+            url,
+            credentials: 'include' // withCredentials to true
         };
         if (body) {
             if (url.endsWith('access-token')) {
@@ -40,16 +42,21 @@ function authHeader(url) {
     }
 }
 
-async function handleResponse(response) {
+async function handleResponse(response, requestOptions, retry = true) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
 
     // check for error response
     if (!response.ok) {
-        const { user, logout } = useAuthStore();
-        if ([401, 403].includes(response.status) && user) {
-            // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-            logout();
+        const { logout, refreshAccessToken } = useAuthStore();
+        if ([401].includes(response.status) && retry) {
+            try {
+                await refreshAccessToken();
+                return fetch(requestOptions.url, requestOptions).then(response => handleResponse(response, requestOptions, false));
+            } catch (error) {
+                // auto logout if refreshing access token fails
+                logout();
+            }
         }
 
         // get error message from body or default to response status
