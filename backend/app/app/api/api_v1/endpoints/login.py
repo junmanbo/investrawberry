@@ -53,7 +53,7 @@ async def login_access_token(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,
+        secure=True,
         max_age=int(refresh_token_expires.total_seconds()),
         expires=refresh_expire,
         path="/",
