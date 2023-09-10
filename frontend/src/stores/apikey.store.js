@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
 import { useAlertStore } from '@/stores';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/exchangekeys/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/exchangekeys`;
 
 export const useApiKeyStore = defineStore({
     id: 'apikey',

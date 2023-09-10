@@ -7,9 +7,8 @@
         <div v-else>
             <ul>
                 <li v-for="(key, index) in apiKeyStore.apiKeys" :key="index">
-                    <strong>거래소: </strong>{{ key.exchange.exchange_nm }}
+                    <strong>거래소: </strong>{{ key.exchange.exchange_knm }}
                     <br/>
-                    <strong>Access Key: </strong>{{ key.access_key }}
                     <button @click="deleteKey(key.id)">삭제</button>
                 </li>
             </ul>
@@ -29,7 +28,6 @@
                         <option disabled value="">거래소 선택</option>
                         <option>UPBIT</option>
                         <option>KIS</option>
-                        <option>KIS_INTL</option>
                     </select>
 
                     <label for="access_key">Access Key:</label>
