@@ -14,12 +14,12 @@ class KIS:
     def get_total_balance(self) -> dict:
         balances = self.get_balance()
         total_krw = int(balances.get("output2", [])[0].get("nass_amt"))
-        balances = balances.get("output1")
+        balances = balances.get("output1", None)
 
         buying_krw = 0
         total_balance = {}
 
-        if not balances:
+        if balances is None:
             return total_balance
 
         for balance in balances:
