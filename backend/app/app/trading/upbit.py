@@ -54,7 +54,9 @@ class Upbit:
         return markets
 
     def place_order(self, params):
-        symbol = f"{params.ticker.symbol}/{params.ticker.currency}"  # ccxt 에 맞는 symbol
+        symbol = (
+            f"{params.ticker.symbol}/{params.ticker.currency}"  # ccxt 에 맞는 symbol
+        )
         side = params.side.lower()
         order_type = params.order_type.lower()
 
