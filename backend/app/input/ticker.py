@@ -1,6 +1,7 @@
 import os
 import time
-import re
+
+# import re
 from coinmarketcapapi import CoinMarketCapAPI
 
 from app.api import deps
@@ -130,7 +131,9 @@ for idx, row in markets.iterrows():
             marketcap=row["시가총액"], price=row["기준가"], asset_type="kr_stock"
         )
         crud.ticker.update(db=db, db_obj=ticker, obj_in=ticker_in)
-    print(f"{row['단축코드']} - {row['한글명']} cap: {row['시가총액']} price: {row['기준가']}")
+    print(
+        f"{row['단축코드']} - {row['한글명']} cap: {row['시가총액']} price: {row['기준가']}"
+    )
 db.commit()
 
 # Close the db
