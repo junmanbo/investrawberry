@@ -10,7 +10,7 @@ from app.schemas.ticker import TickerCreate, TickerUpdate
 
 class CRUDTicker(CRUDBase[Ticker, TickerCreate, TickerUpdate]):
     def search_ticker_by_query(
-        self, db: Session, *, query: str, skip: int = 0, limit: int = 5
+        self, db: Session, *, query: str, skip: int = 0, limit: int = 20
     ) -> List[Ticker]:
         return (
             db.query(Ticker)

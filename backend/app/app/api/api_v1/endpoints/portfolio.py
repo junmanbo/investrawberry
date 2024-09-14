@@ -167,3 +167,28 @@ async def update_portfolio(
 
     portfolio = crud.portfolio.get(db=db, id=portfolio.id)
     return portfolio
+
+
+@router.delete("/{portfolio_id}")
+async def delete_portfolio(
+    *,
+    db: Session = Depends(deps.get_db),
+    portfolio_id: int,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Delete the portfolio.
+    """
+    portfolio = crud.portfolio_ticker.get_by_portfolio_id(db, id=portfolio_id)
+    if not portfolio:
+        raise HTTPException(
+            status_code=404,
+            detail="The portfolio with this id does not exist in the system",
+        )
+    if portfolio.user_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    portfolio = crud.exchange_key.remove(db, id=portfolio_id)
+    if portfolio is True:
+        return {"message": "success"}
+    else:
+        return {"message": "failed"}
