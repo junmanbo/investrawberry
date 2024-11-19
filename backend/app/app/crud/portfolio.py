@@ -25,6 +25,10 @@ class CRUDPortfolio(CRUDBase[Portfolio, PortfolioCreate, PortfolioUpdate]):
         """실행중인 포트폴리오 조회"""
         return db.query(Portfolio).filter_by(is_running=is_running).all()
 
+    def get_portfolio_by_id(self, db: Session, *, portfolio_id: int) -> List[Portfolio]:
+        """유저가 저장한 포트폴리오 조회"""
+        return db.query(Portfolio).filter_by(id=portfolio_id).first()
+
 
 portfolio = CRUDPortfolio(Portfolio)
 

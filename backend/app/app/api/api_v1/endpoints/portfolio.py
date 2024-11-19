@@ -179,7 +179,7 @@ async def delete_portfolio(
     """
     Delete the portfolio.
     """
-    portfolio = crud.portfolio_ticker.get_by_portfolio_id(db, id=portfolio_id)
+    portfolio = crud.portfolio.get_portfolio_by_id(db, portfolio_id=portfolio_id)
     if not portfolio:
         raise HTTPException(
             status_code=404,
@@ -187,7 +187,7 @@ async def delete_portfolio(
         )
     if portfolio.user_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    portfolio = crud.exchange_key.remove(db, id=portfolio_id)
+    portfolio = crud.portfolio.remove(db, id=portfolio_id)
     if portfolio is True:
         return {"message": "success"}
     else:
