@@ -30,6 +30,7 @@ psycopg2-binary = "^2.9.6"
 pandas = "^2.0.3"
 flower = "^2.0.1"
 tenacity = "^8.2.3"
+confluent-kafka = "^2.6.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.12.0"
