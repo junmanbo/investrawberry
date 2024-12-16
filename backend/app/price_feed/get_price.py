@@ -11,7 +11,8 @@ from typing import List
 
 print("CCXT Version:", ccxt.__version__)
 
-REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
+#REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", "localhost")
+REDIS_HOSTNAME = "localhost"
 
 
 class UpbitData:

@@ -1,23 +1,14 @@
 services:
-  tutongdev_db:
-    image: postgres:14
-    container_name: tutongdev_db
+  db:
+    image: postgres:latest
+    container_name: db
     restart: always
     env_file:
-      - .env
+      - ./.env
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    container_name: pgadmin_cont
-    env_file:
-      - .env
-    ports:
-      - "8432:80"
 
 volumes:
   pg_data:
